@@ -1,0 +1,243 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Device Supports &mdash; pscdrv 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pscdrv 1.0 documentation" href="index.html" />
+    <link rel="prev" title="Message Processing" href="processing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="processing.html" title="Message Processing"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">pscdrv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="device-supports">
+<h1>Device Supports<a class="headerlink" href="#device-supports" title="Permalink to this headline">¶</a></h1>
+<p>A number of EPICS Device Supports are available which move data
+to/from message buffers, or provide driver internal information (eg. TCP connection status).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All Device Supports use the INST_IO Link format (prefixed with &#8220;&#64;&#8221;) for INP and OUT fields.</p>
+</div>
+<div class="section" id="internal">
+<h2>Internal<a class="headerlink" href="#internal" title="Permalink to this headline">¶</a></h2>
+<p>All Supports expect a link with only the name of a Device instance.
+Typically this will be a macro (eg. &#8220;&#64;$(DEVICE)&#8221;).</p>
+<div class="section" id="psc-ctrl-connected">
+<h3>PSC Ctrl Connected<a class="headerlink" href="#psc-ctrl-connected" title="Permalink to this headline">¶</a></h3>
+<p>A binary status indicating if the TCP connection is currently active.:</p>
+<div class="highlight-python"><pre>record(bi, "$(P)Conn-Sts") {
+    field(DTYP, "PSC Ctrl Connected")
+    field(DESC, "Connection status")
+    field(INP , "@$(NAME)")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "Disconnected")
+    field(ONAM, "Connected")
+    field(ZSV , "MAJOR")
+}</pre>
+</div>
+<p>When SCAN=&#8221;I/O Intr&#8221; this record will update immediately.
+A record with this support can be combined with a calcoutRecord with OOPT=&#8221;Transition to Non-zero&#8221;
+to process some records each time the connection is (re)esstablish.
+This might be used to (re)synchronize the device to match the IOC state when recovering from a power loss.</p>
+</div>
+<div class="section" id="psc-ctrl-message">
+<h3>PSC Ctrl Message<a class="headerlink" href="#psc-ctrl-message" title="Permalink to this headline">¶</a></h3>
+<p>A stringin record which contains the last informational log messages from the Driver.
+The messages are sent at various times based on indicate internal state changes in the Driver
+(eg. connection timeout).:</p>
+<div class="highlight-python"><pre>record(stringin, "$(P)Msg-I") {
+    field(DTYP, "PSC Ctrl Message")
+    field(DESC, "Last message")
+    field(INP , "@$(NAME)")
+    field(SCAN, "I/O Intr")
+}</pre>
+</div>
+</div>
+<div class="section" id="psc-conn-count">
+<h3>PSC Conn Count<a class="headerlink" href="#psc-conn-count" title="Permalink to this headline">¶</a></h3>
+<p>A longin record which increments each time a TCP connection is established.</p>
+</div>
+<div class="section" id="psc-unknown-msg-count">
+<h3>PSC Unknown Msg Count<a class="headerlink" href="#psc-unknown-msg-count" title="Permalink to this headline">¶</a></h3>
+<p>A longin record which increments each time a message is received with a message ID
+which is not associated with any Records and will be discarded.  This may be useful
+during development.</p>
+</div>
+<div class="section" id="psc-ctrl-send">
+<h3>PSC Ctrl Send<a class="headerlink" href="#psc-ctrl-send" title="Permalink to this headline">¶</a></h3>
+<p>A longout record which queues the buffer for a single message ID to be sent.
+See Driver Data Flow.
+The message ID to be queued is taken from the VAL field, which must be in the range [0,65535].
+This can either be set in the database file, or at runtime by modifiying the VAL field.</p>
+</div>
+<div class="section" id="psc-ctrl-send-all">
+<h3>PSC Ctrl Send All<a class="headerlink" href="#psc-ctrl-send-all" title="Permalink to this headline">¶</a></h3>
+<p>A bo record which flushes the queued send buffer to the socket send buffer.
+See Driver Data Flow.</p>
+</div>
+</div>
+<div class="section" id="single-register-writes">
+<h2>Single Register Writes<a class="headerlink" href="#single-register-writes" title="Permalink to this headline">¶</a></h2>
+<p>These Supports send IOC to Device messages with an 8 byte body consisting of an address (4 bytes) and data (4 bytes).
+The data can be either a 32-bit integer (unsigned or 2s complement signed), or a 32-bit IEEE-754 single precision floating point number.
+All are in big endian byte order.</p>
+<p>The following is a complete example message, including 8 bytes of header and 8 bytes of body.:</p>
+<div class="highlight-python"><pre>      0     1     2     3
+   +-----+-----+-----------+
+0  |  P  |  S  |   Msg ID  |
+   +-----+-----+-----+-----+
+4  |  0  |  0  |  0  |  8  |
+   +-----+-----+-----+-----+
+8  |         Address       |
+   +-----+-----+-----------+
+C  |         Value         |
+   +-----------------------+</pre>
+</div>
+<p>The additional of the optional &#8216;info(SYNC, &#8220;SAME&#8221;)&#8217; tag enables the output (ao, bo, longout, mbbo, mbboDirect) record
+to also listen for a Device to IOC message with the same format.  When such a message is received, the record
+value will be updated without sending an IOC to Device message.
+This allows an IOC to be synced to a device, enabling multi-master scenarios.</p>
+<p>All Supports expect a link with only the name of a Device instance, block number, and register number
+(eg. &#8220;&#64;$(DEV) 10 20&#8221;).</p>
+<div class="section" id="psc-single-u32">
+<h3>PSC Single U32<a class="headerlink" href="#psc-single-u32" title="Permalink to this headline">¶</a></h3>
+<p>For bo, mbbo, and mbboDirect records, the value is interpreted as an unsigned 32-bit integer.</p>
+</div>
+<div class="section" id="psc-single-i32">
+<h3>PSC Single I32<a class="headerlink" href="#psc-single-i32" title="Permalink to this headline">¶</a></h3>
+<p>For ao and longout records, the value is interpreted as a 2&#8217;s complement signed 32-bit integer.</p>
+<p>The following example will queue a IOC to Device message the record&#8217;s value as a signed integer along
+with the address 128 in a message with ID #4.
+The presense of the optional &#8220;SYNC&#8221; info tag means that if a Device to IOC message with body size &gt;=8 and ID #4 is received,
+and the first 4 body bytes match 128, then this record will be updated using the second 4 body bytes.:</p>
+<div class="highlight-python"><pre>record(longout, "$(P)Reg:0-SP") {
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@$(DEV) 4 128")
+    info(SYNC, "SAME")
+}</pre>
+</div>
+</div>
+<div class="section" id="psc-single-f32">
+<h3>PSC Single F32<a class="headerlink" href="#psc-single-f32" title="Permalink to this headline">¶</a></h3>
+<p>For ao records, the value is interpreted as a 32-bit IEEE-754 single precision floating point number.</p>
+</div>
+</div>
+<div class="section" id="register-blocks">
+<h2>Register Blocks<a class="headerlink" href="#register-blocks" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="waveform-blocks">
+<h2>Waveform Blocks<a class="headerlink" href="#waveform-blocks" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Device Supports</a><ul>
+<li><a class="reference internal" href="#internal">Internal</a><ul>
+<li><a class="reference internal" href="#psc-ctrl-connected">PSC Ctrl Connected</a></li>
+<li><a class="reference internal" href="#psc-ctrl-message">PSC Ctrl Message</a></li>
+<li><a class="reference internal" href="#psc-conn-count">PSC Conn Count</a></li>
+<li><a class="reference internal" href="#psc-unknown-msg-count">PSC Unknown Msg Count</a></li>
+<li><a class="reference internal" href="#psc-ctrl-send">PSC Ctrl Send</a></li>
+<li><a class="reference internal" href="#psc-ctrl-send-all">PSC Ctrl Send All</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#single-register-writes">Single Register Writes</a><ul>
+<li><a class="reference internal" href="#psc-single-u32">PSC Single U32</a></li>
+<li><a class="reference internal" href="#psc-single-i32">PSC Single I32</a></li>
+<li><a class="reference internal" href="#psc-single-f32">PSC Single F32</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#register-blocks">Register Blocks</a></li>
+<li><a class="reference internal" href="#waveform-blocks">Waveform Blocks</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="processing.html"
+                        title="previous chapter">Message Processing</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/devsup.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="processing.html" title="Message Processing"
+             >previous</a> |</li>
+        <li><a href="index.html">pscdrv 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Michael Davidsaver.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
