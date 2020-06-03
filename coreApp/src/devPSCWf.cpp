@@ -74,7 +74,7 @@ long read_wf(waveformRecord* prec)
         Guard g(priv->psc->lock);
 
         if(!priv->psc->isConnected()) {
-            int junk = recGblSetSevr(prec, READ_ALARM, INVALID_ALARM);
+            int junk = recGblSetSevrMsg(prec, READ_ALARM, INVALID_ALARM, "No Conn");
             junk += 1;
             return 0;
         }
@@ -115,7 +115,7 @@ long read_wf_bytes(waveformRecord* prec)
         Guard g(priv->psc->lock);
 
         if(!priv->psc->isConnected()) {
-            int junk = recGblSetSevr(prec, READ_ALARM, INVALID_ALARM);
+            int junk = recGblSetSevrMsg(prec, READ_ALARM, INVALID_ALARM, "No Conn");
             junk += 1;
             return 0;
         }
@@ -159,7 +159,7 @@ long write_wf(waveformRecord* prec)
         Guard g(priv->psc->lock);
 
         if(!priv->psc->isConnected()) {
-            (void)recGblSetSevr(prec, READ_ALARM, INVALID_ALARM);
+            (void)recGblSetSevrMsg(prec, READ_ALARM, INVALID_ALARM, "No Conn");
             return 0;
         }
 
@@ -178,7 +178,7 @@ long write_wf_bytes(waveformRecord* prec)
         Guard g(priv->psc->lock);
 
         if(!priv->psc->isConnected()) {
-            (void)recGblSetSevr(prec, READ_ALARM, INVALID_ALARM);
+            (void)recGblSetSevrMsg(prec, READ_ALARM, INVALID_ALARM, "No Conn");
             return 0;
         }
 
