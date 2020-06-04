@@ -22,6 +22,7 @@ pscCore_SRCS += devPSCReg.cpp
 pscCore_SRCS += devPSCSingle.cpp
 pscCore_SRCS += devPSCCtrl.cpp
 pscCore_SRCS += devPSCSV.cpp
+pscCore_SRCS += devPSCPVI.cpp
 
 INC += psc/device.h
 INC += psc/evbase.h
