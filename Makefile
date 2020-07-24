@@ -14,6 +14,10 @@ iocBoot_DEPEND_DIRS += $(filter %App,$(DIRS))
 testApp_DEPEND_DIRS += coreApp
 sigApp_DEPEND_DIRS += coreApp
 
+pscApp_DEPEND_DIRS += coreApp
+pscApp_DEPEND_DIRS += sigApp
+pscApp_DEPEND_DIRS += waveANLApp
+
 include $(TOP)/configure/RULES_TOP
 
 
