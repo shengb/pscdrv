@@ -1,0 +1,88 @@
+record(longout,"$(INPUT)-Slicer-Idx1")
+{
+    field(OUT,  "$(INPUT)-Slicer-aSub_.B")
+    field(FLNK, "$(INPUT)-Slicer-aSub_")
+    field(PINI, "YES")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(longout,"$(INPUT)-Slicer-Idx2")
+{
+    field(OUT,  "$(INPUT)-Slicer-aSub_.C")
+    field(FLNK, "$(INPUT)-Slicer-aSub_")
+    field(PINI, "YES")    
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(longout,"$(INPUT)-Slicer-Idx3")
+{
+    field(OUT,  "$(INPUT)-Slicer-aSub_.D")
+    field(FLNK, "$(INPUT)-Slicer-aSub_")
+    field(PINI, "YES")    
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(ai,"$(INPUT)-Slicer-Val1")
+{
+    # sync timestamp with INPUT
+    field(TSEL, "$(INPUT).TIME")
+}
+
+record(ai,"$(INPUT)-Slicer-Val2")
+{
+    # sync timestamp with INPUT
+    field(TSEL, "$(INPUT).TIME")
+}
+
+record(ai,"$(INPUT)-Slicer-Val3")
+{
+    # sync timestamp with INPUT
+    field(TSEL, "$(INPUT).TIME")
+}
+
+# this aSub record can provide up to 5 slicers but only 3 are used
+record(aSub, "$(INPUT)-Slicer-aSub_")
+{
+    field(SNAM, "subSlice")
+    
+    field(INPA, "$(INPUT)-Avg-I CP")
+    field(FTA,  "FLOAT")    
+    field(NOA,  "$(WF_LENGTH)")
+            
+    field(FTB,  "LONG")
+    field(NOB,  "1")
+    
+    field(FTC,  "LONG")
+    field(NOC,  "1")
+    
+    field(FTD,  "LONG")
+    field(NOD,  "1")
+    
+    field(FTE,  "LONG")
+    field(NOE,  "1")
+    
+    field(FTF,  "LONG")
+    field(NOF,  "1")
+    
+    field(NOVB, "1")
+    field(FTVB, "FLOAT")
+    field(OUTB, "$(INPUT)-Slicer-Val1 PP")
+    
+    field(NOVC, "1")
+    field(FTVC, "FLOAT")
+    field(OUTC, "$(INPUT)-Slicer-Val2 PP")
+    
+    field(NOVD, "1")
+    field(FTVD, "FLOAT")
+    field(OUTD, "$(INPUT)-Slicer-Val3 PP")
+    
+    field(NOVE, "1")
+    field(FTVE, "FLOAT")
+    
+    field(NOVF, "1")
+    field(FTVF, "FLOAT")
+}
+

@@ -1,0 +1,9 @@
+version 1.1.0, Apr 10, 2014
+--------------------------
++ Added "Off mode"
++ Added separate tollerances for different modes
+* Reference values are autosaved
+* Fixed all known issues (e.g. freezing flags values
+  after switching monitoring mode)
+* Binary monitoring operates with full set of PVs (MonitFlg, ArchFlg, Arch)
+* ENABLED & CH_FLG should be provided to dedicated Monit*.db (not *Common.db)

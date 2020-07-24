@@ -1,0 +1,23 @@
+record(aSub, "$(OUTPUT)_Sub_aSub_")
+{
+    field(SNAM, "subArraySubtraction")
+    
+    field(INPA, "$(INPUT1) CP")
+    field(FTA,  "FLOAT")    
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(INPUT2)")
+    field(FTB,  "FLOAT")    
+    field(NOB,  "$(WF_LENGTH)")
+    
+    field(NOVA, "$(WF_LENGTH)")
+    field(FTVA, "FLOAT")
+    field(OUTA, "$(OUTPUT) PP")
+}
+
+record(waveform, "$(OUTPUT)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "FLOAT")
+}
+

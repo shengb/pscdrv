@@ -1,0 +1,18 @@
+record(aSub, "$(INPUT)_FFT_")
+{
+    field(SNAM, "subFFT")
+    
+    field(INPA, "$(INPUT) CP")
+    field(FTA,  "DOUBLE")
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(NOVA, "$(WF_LENGTH)")
+    field(FTVA, "DOUBLE")
+    field(OUTA, "$(OUTPUT) PP")
+}
+
+record(waveform, "$(OUTPUT)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "FLOAT")
+}

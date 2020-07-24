@@ -1,0 +1,45 @@
+record(longout,"$(OUTPUT)-AvgWndSize-SP")
+{
+    field(DESC, "Averaging Window Size")
+    field(LOPR, "0")
+    field(HOPR, "512")
+    field(VAL,  "0")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(aSub, "$(OUTPUT)_Avg_aSub_")
+{
+    field(SNAM, "subArrayMovingAverage")
+    
+    field(INPA, "$(INPUT) CP")
+    field(FTA,  "FLOAT")
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(OUTPUT)-AvgWndSize-SP PP")
+    field(FTB,  "LONG")
+    field(NOB,  "1")
+        
+    field(NOVA, "$(WF_LENGTH)")
+    field(FTVA, "FLOAT")
+    field(OUTA, "$(OUTPUT) PP")
+    
+    field(NOVB, "1")
+    field(FTVB, "LONG")
+    field(OUTB, "$(OUTPUT)-AvgWndSize-RB PP")
+
+}
+
+record(longin,"$(OUTPUT)-AvgWndSize-RB")
+{
+    field(DESC, "Real Averaging Window Size")
+}
+
+record(waveform, "$(OUTPUT)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "FLOAT")
+    
+    # sync timestamp of OUTPUT with INPUT
+    field(TSEL, "$(INPUT).TIME")
+}

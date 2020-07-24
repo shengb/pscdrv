@@ -1,0 +1,63 @@
+record(waveform, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_Raw-SP") {
+	field(DTYP, "PSC Target Table")
+	field(INP , "@Tx$(PSC) Rx$(PSC) $(MSGID)")
+	field(FTVL, "FLOAT")
+	field(NELM, "$(RAWDATA_LENGTH)")
+}
+
+record(mbbo, "$(PriSys){$(PSC)}DAC:$(CHANNEL)-Sel") {
+    field(DTYP, "PSC Table Mode")
+    field(OUT,  "@Tx$(PSC) Rx$(PSC) $(MSGID)")
+    field(ZRST, "Imme")
+    field(ZRVL, "0")
+    field(ONST, "Auto")
+    field(ONVL, "1")
+#    field(TWST, "Man")  # isn't realized
+#    field(TWVL, "2")
+    
+    field(PINI, "YES")
+    
+    info(autosaveFields_pass0, "RVAL")
+}
+
+record(longout, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_DeltaSteps-SP") {
+    field(LOPR, "1")
+    field(DOL,  "$(DELTA_STEPS) CP")
+    field(OMSL, "closed_loop")
+}
+
+record(calcout, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_DeltaSteps_calc_") {
+    field(INPA, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_DeltaSteps-SP CP")
+    field(INPB, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_Delta-SP CP")
+    
+    field(CALC, "A < 1 ? 2*B : 2*B/FLOOR(A)")
+    
+    field(OUT,  "$(PriSys){$(PSC)}DAC:$(CHANNEL)_Delta2-SP PP")
+}
+
+record(ao, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_Delta-SP") {
+    field(DTYP, "PSC Table Max Delta 1")
+    field(OUT,  "@Tx$(PSC) Rx$(PSC) $(MSGID)")
+    field(DOL,  "$(DELTA) CP")
+    field(OMSL, "closed_loop")
+}
+
+record(ao, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_Delta2-SP") {
+    field(DTYP, "PSC Table Max Delta 2")
+    field(OUT,  "@Tx$(PSC) Rx$(PSC) $(MSGID)")    
+}
+
+record(longout, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_trStart-SP") {
+    field(DTYP, "PSC Transient Start")
+    field(OUT,  "@Tx$(PSC) Rx$(PSC) $(MSGID)")
+    
+    field(PINI, "YES")
+
+    info(autosaveFields_pass0, "VAL")    
+}
+
+record(mbbiDirect, "$(PriSys){$(PSC)}DAC:$(CHANNEL)_Tbl-Sts") {
+    field(DTYP, "PSC Table Alarm Bits")
+    field(INP,  "@Tx$(PSC) Rx$(PSC) $(MSGID)")
+    field(SCAN, "I/O Intr")
+}

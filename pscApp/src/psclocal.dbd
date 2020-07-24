@@ -1,0 +1,48 @@
+function(subADCWfProc)
+function(subApplyCoefficient)
+function(subFFT)
+function(subSlice)
+function(subSampling)
+function(subArraySubtraction)
+function(subArrayMovingAverage)
+function(subArrayStatsVariance)
+function(subZero)
+function(subArrayCompare)
+
+# BPM
+function(fbckSupInit)
+function(fbckSupRMSCalc)
+function(SaStdCalSupInit)
+function(SaStdCalSup)
+function(bpmPosXyUnitConvrsion)
+function(bpmWfmPolyCoeffCalSup)
+
+function(posPolyCoeffCalSupInit)
+function(posPolyCoeffCalSup)
+function(bpmPosButtonSum)
+function(cc_fa_bpmPsdIntCal)
+# end of BPM
+
+
+# Encoder interface
+function(subEncStreamProc)
+function(subEncFormatProc)
+function(subEncTSProc)
+function(subEncABProc)
+
+# General Purpose DAQ Board
+function(subGenStreamProc)
+function(subGenFormatProc)
+function(subGenTSProc)
+function(subGenVoltProc)
+
+# PSC table
+device(waveform, INST_IO, devPSCTblOutWfTG,  "PSC Target Table")
+device(mbbo,     INST_IO, devPSCTblMbboMode, "PSC Table Mode")
+device(ao,       INST_IO, devPSCTblAo1Mode,  "PSC Table Max Delta 1")
+device(ao,       INST_IO, devPSCTblAo2Mode,  "PSC Table Max Delta 2")
+device(longout,  INST_IO, devPSCTblLoStart,  "PSC Transient Start")
+
+device(mbbiDirect, INST_IO, devPSCTblMbbiDirectAlarms, "PSC Table Alarm Bits")
+
+variable(PSCTblCtlDebug, int)

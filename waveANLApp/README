@@ -1,0 +1,20 @@
+
+source:
+http://slac.stanford.edu/grp/lcls/controls/global/sw/epics/site/waveProc/waveProc-head/src/waveAnlRecord/
+
+
+../src/Makefile
+
+LIB_SRCS += waveSubs.c
+
+
+../modbusSupport.dbd
+registrar(testSubRegistrar)
+
+../Db
+
+waTest.db
+
+../Db/Makefile
+
+DB += waTest.db

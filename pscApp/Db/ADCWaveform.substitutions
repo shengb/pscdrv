@@ -1,0 +1,26 @@
+file ADCWaveform.template
+{ pattern 
+{msgid, NAME, FLINK, WF_LENGTH}
+{16, ADC10k:0, "", "$(ADC10K_POINTS)"}
+{17, ADC10k:1, "", "$(ADC10K_POINTS)"}
+
+{32, ADC:00, "", "$(ADC1K_POINTS)"}
+{33, ADC:01, "", "$(ADC1K_POINTS)"}
+{34, ADC:02, "", "$(ADC1K_POINTS)"}
+{35, ADC:03, "", "$(ADC1K_POINTS)"}
+{36, ADC:04, "", "$(ADC1K_POINTS)"}
+{37, ADC:05, "", "$(ADC1K_POINTS)"}
+{38, ADC:06, "", "$(ADC1K_POINTS)"}
+{39, ADC:07, "", "$(ADC1K_POINTS)"}
+{40, ADC:16, "", "$(ADC1K_POINTS)"}
+
+{48, ADC:08, "", "$(ADC1K_POINTS)"}
+{49, ADC:09, "", "$(ADC1K_POINTS)"}
+{50, ADC:10, "", "$(ADC1K_POINTS)"}
+{51, ADC:11, "", "$(ADC1K_POINTS)"}
+{52, ADC:12, "", "$(ADC1K_POINTS)"}
+{53, ADC:13, "", "$(ADC1K_POINTS)"}
+{54, ADC:14, "", "$(ADC1K_POINTS)"}
+{55, ADC:15, "", "$(ADC1K_POINTS)"}
+{56, ADC:17, "$(PSy){$(PS)}regsend", "$(ADC1K_POINTS)"}
+}

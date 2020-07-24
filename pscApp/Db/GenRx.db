@@ -1,0 +1,144 @@
+#####
+# General Purpose board streaming input
+#####
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}T:sec_Bin_") {
+	field(DESC, "Timestamp seconds part unformatted")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Gen) 5$(Chan) 0 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+        field(FLNK, "$(Sys){$(Dev=GP-ADC):$(Chan)}Format_asub_")
+}
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}T:nsec_Bin_") {
+	field(DESC, "Timestamp nanoseconds part unformatted")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Gen) 5$(Chan) 4 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+        field(FLNK, "$(Sys){$(Dev=GP-ADC):$(Chan)}TS_asub_")
+}
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}Cnt:Index_Bin_") {
+	field(DESC, "GP-ADC chunk number index counter")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Gen) 5$(Chan) 8 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+}
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}Data_Bin_") {
+	field(DESC, "GP-ADC raw data")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Gen) 5$(Chan) 12 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+        field(FLNK, "$(Sys){$(Dev=GP-ADC):$(Chan)}V_asub_")
+}
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}Stream_Bin_") {
+	field(DESC, "Raw stream from the device")
+        field(DTYP, "PSC Block I8 In")
+        field(INP , "@Rx$(Dev=Gen) 5$(Chan)")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "UCHAR")
+        field(NELM, "16384")
+#        field(FLNK, "$(Sys){$(Dev=GP-ADC):$(Chan)}Stream_asub_")
+}
+
+record(aSub, "$(Sys){$(Dev=GP-ADC):$(Chan)}Format_asub_")
+{
+        field(SNAM, "subGenFormatProc")
+        field(INPA, "$(Sys){$(Dev=GP-ADC):$(Chan)}T:sec_Bin_.VAL")
+        field(FTA,  "DOUBLE")
+        field(NOA,  "1024")
+        field(INPB, "$(Sys){$(Dev=GP-ADC):$(Chan)}T:nsec_Bin_.VAL")
+        field(FTB,  "DOUBLE")
+        field(NOB,  "1024")
+        field(INPD, "$(Sys){$(Dev=GP-ADC):$(Chan)}Cnt:Index_Bin_.VAL")
+        field(FTD,  "DOUBLE")
+        field(NOD,  "1024")
+        field(INPE, "$(Sys){$(Dev=GP-ADC):$(Chan)}Data_Bin_.VAL")
+        field(FTE,  "DOUBLE")
+        field(NOE,  "1024")
+        field(INPF, "$(Chan)")
+        field(FTG,  "STRING")
+        field(INPG, "$(Sys){$(Dev=GP-ADC):$(Chan)}ID:File.VAL")
+        field(DISV, "1")
+        field(SDIS, "$(Sys){$(Dev=GP-ADC):$(Chan)}ID:File.UDF")
+	field(OUTA, "$(Sys){$(Dev=GP-ADC):$(Chan)}FileSize PP")
+}
+
+record(stringin, "$(Sys){$(Dev=GP-ADC):$(Chan)}ID:File") {
+        field(DTYP, "Soft Channel")
+        field(INP, "~/EncoderData/format_ch$(Chan).out")
+        field(PINI, "YES")
+        field(DISV, "0")
+        field(SDIS, "$(Sys){$(Dev=GP-ADC):$(Chan)}Ena-RB")
+        info(autosaveFields_pass0, "VAL")
+}
+
+record(ai, "$(Sys){$(Dev=GP-ADC):$(Chan)}FileSize") {
+        field(DTYP, "Soft Channel")
+        field(DESC, "Out File Size, MB")
+        field(EGU, "MB")
+}
+
+record(aSub, "$(Sys){$(Dev=GP-ADC):$(Chan)}Stream_asub_")
+{
+        field(SNAM, "subGenStreamProc")
+        field(INPA, "$(Sys){$(Dev=GP-ADC):$(Chan)}Stream_Bin_.VAL")
+        field(FTA,  "UCHAR")
+        field(NOA,  "16384")
+        field(FTB,  "STRING")
+        field(INPB, "$(Sys){$(Dev=GP-ADC):$(Chan)}ID:File")
+        field(DISV, "1")
+        field(SDIS, "$(Sys){$(Dev=GP-ADC):$(Chan)}ID:File.UDF")
+}
+
+record(aSub, "$(Sys){$(Dev=GP-ADC):$(Chan)}TS_asub_")
+{
+        field(SNAM, "subGenTSProc")
+        field(INPA, "$(Sys){$(Dev=GP-ADC):$(Chan)}T:sec_Bin_.VAL")
+        field(FTA,  "DOUBLE")
+        field(NOA,  "1024")
+        field(INPB, "$(Sys){$(Dev=GP-ADC):$(Chan)}T:nsec_Bin_.VAL")
+        field(FTB,  "DOUBLE")
+        field(NOB,  "1024")
+        field(FTVA, "DOUBLE")
+        field(NOVA, "1024")
+        field(OUTA, "$(Sys){$(Dev=GP-ADC):$(Chan)}TS-I PP")
+        field(FLNK, "")
+}
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}TS-I")
+{
+	field(DESC, "Combined timestamp")
+        field(NELM, "1024")
+        field(FTVL, "DOUBLE")
+}
+
+record(aSub, "$(Sys){$(Dev=GP-ADC):$(Chan)}V_asub_")
+{
+        field(SNAM, "subGenVoltProc")
+        field(INPA, "$(Sys){$(Dev=GP-ADC):$(Chan)}Data_Bin_.VAL")
+        field(FTA,  "DOUBLE")
+        field(NOA,  "1024")
+        field(FTVA, "DOUBLE")
+        field(NOVA, "1024")
+        field(OUTA, "$(Sys){$(Dev=GP-ADC):$(Chan)}V-I PP")
+        field(FLNK, "")
+}
+
+record(waveform, "$(Sys){$(Dev=GP-ADC):$(Chan)}V-I")
+{
+	field(DESC, "ADC voltage reading")
+        field(NELM, "1024")
+        field(FTVL, "DOUBLE")
+}
+

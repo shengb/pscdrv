@@ -1,0 +1,215 @@
+#####
+# General Purpse DAQ board control database
+# Command format (16-bit max):
+# 15..12 11..8 7 .. 4 3 .. 0
+# <cmd>  <mod> <reg> <offset>
+# supported commands:
+# 0 - reg bit write
+# 1 - reg u8 write
+# 2 - reg u16 write
+# 3 - reg u32 write
+# mod is FPGA IP module ref number. Modules used:
+# spiadc (# 0-1) for spi adc handling,
+# evr_dummy (# 3) for internal EVR (TS) generation,
+# spidac (# 8) for spi dac handling,
+# reg is register number inside the module (0..7)
+# offset is a bit/byte/word offset inside reg 
+# for reg bit/u8/u16 write cmd, ignored for u32
+####
+
+record(bo, "$(Sys){$(ADC=GP-ADC):1}Rst-Cmd") {
+    field(DESC, "Resets ADC FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x0000")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(ADC=GP-ADC):1}Ena-Sel") {
+    field(DESC, "Channel AD convertion enable")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x0002")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignore")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(longout, "$(Sys){$(ADC=GP-ADC):1}F:Sample-SP") {
+    field(DESC, "Set sample rate")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x3020")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(longout, "$(Sys){$(Dev=Gen)}T:sec-SP") {
+    field(DESC, "Set sec for internal timestamp")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x3210")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(longout, "$(Sys){$(Dev=Gen)}T:nsec-SP") {
+    field(DESC, "Set nsec for internal timestamp")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x3220") 
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Gen)}T:Set-Cmd") {
+    field(DESC, "Set internal timestamp to SP")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x0202")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+    field(HIGH, "1")
+}
+
+record(bo, "$(Sys){$(Dev=Gen)}T:Internal-Sel") {
+    field(DESC, "Use internally generated timestamp")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x0201")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+    field(ZNAM, "External")
+    field(ONAM, "Internal")
+}
+
+record(bo, "$(Sys){$(DAC=GP-DAC):1}Rst-Cmd") {
+    field(DESC, "Resets DAC FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x0800")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(DAC=GP-DAC):1}Trig-Cmd") {
+    field(DESC, "Channel DAC output update")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x0801")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(ao, "$(Sys){$(DAC=GP-DAC):1}E:A-SP") {
+    field(DESC, "DAC 1 Ch A voltage")
+    field(LOPR, "-9.99969")
+    field(HOPR, "9.99969")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E:A-calc_")
+}
+
+record(calcout, "$(Sys){$(DAC=GP-DAC):1}E:A-calc_") {
+    field(DESC, "DAC output voltage 2's comp calculation")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:A-SP NPP MS")
+    field(CALC, "(A>=0) ? (A * 32768/10) : ~(-A * 32768/10) - 1")
+    field(OUT, "$(Sys){$(DAC=GP-DAC):1}E_Raw:A-SP_ PP")
+}
+
+record(mbbo, "$(Sys){$(DAC=GP-DAC):1}E_Raw:A-SP_") {
+    field(DESC, "DAC 1 Ch A voltage, DAC code")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x2820")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(ao, "$(Sys){$(DAC=GP-DAC):1}E:B-SP") {
+    field(DESC, "DAC 1 Ch B voltage")
+    field(LOPR, "-9.99969")
+    field(HOPR, "9.99969")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E:B-calc_")
+}
+
+record(calcout, "$(Sys){$(DAC=GP-DAC):1}E:B-calc_") {
+    field(DESC, "DAC output voltage 2's comp calculation")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:B-SP NPP MS")
+    field(CALC, "(A>=0) ? (A * 32768/10) : ~(-A * 32768/10) - 1")
+    field(OUT, "$(Sys){$(DAC=GP-DAC):1}E_Raw:B-SP_ PP")
+}
+
+record(mbbo, "$(Sys){$(DAC=GP-DAC):1}E_Raw:B-SP_") {
+    field(DESC, "DAC 1 Ch B voltage, DAC code")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x2821")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(ao, "$(Sys){$(DAC=GP-DAC):1}E:C-SP") {
+    field(DESC, "DAC 1 Ch C voltage")
+    field(LOPR, "-9.99969")
+    field(HOPR, "9.99969")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E:C-calc_")
+}
+
+record(calcout, "$(Sys){$(DAC=GP-DAC):1}E:C-calc_") {
+    field(DESC, "DAC output voltage 2's comp calculation")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:C-SP NPP MS")
+    field(CALC, "(A>=0) ? (A * 32768/10) : ~(-A * 32768/10) - 1")
+    field(OUT, "$(Sys){$(DAC=GP-DAC):1}E_Raw:C-SP_ PP")
+}
+
+record(mbbo, "$(Sys){$(DAC=GP-DAC):1}E_Raw:C-SP_") {
+    field(DESC, "DAC 1 Ch D voltage, DAC code")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x2830")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(ao, "$(Sys){$(DAC=GP-DAC):1}E:D-SP") {
+    field(DESC, "DAC 1 Ch D voltage")
+    field(LOPR, "-9.99969")
+    field(HOPR, "9.99969")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E:D-calc_")
+}
+
+record(calcout, "$(Sys){$(DAC=GP-DAC):1}E:D-calc_") {
+    field(DESC, "DAC output voltage 2's comp calculation")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:D-SP NPP MS")
+    field(CALC, "(A>=0) ? (A * 32768/10) : ~(-A * 32768/10) - 1")
+    field(OUT, "$(Sys){$(DAC=GP-DAC):1}E_Raw:D-SP_ PP")
+}
+
+record(mbbo, "$(Sys){$(DAC=GP-DAC):1}E_Raw:D-SP_") {
+    field(DESC, "DAC 1 Ch D voltage, DAC code")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x2831")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(longout, "$(Sys){$(GPIO=GP-GPIO)}Dir-SP") {
+    field(DESC, "GPIO Outputs enable")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x3A20")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+record(longout, "$(Sys){$(GPIO=GP-GPIO)}Out-SP") {
+    field(DESC, "GPIO Outputs")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Gen) 1 0x3A30")
+    field(FLNK, "$(Sys){$(Dev=Gen)}GoRegSingleWrite")
+}
+
+#flush reg to socket buffer, trigger send to send all socket buffer to PSC
+record(bo, "$(Sys){$(Dev=Gen)}send") {
+        field(DTYP, "PSC Ctrl Send All")
+        field(OUT , "@Tx$(Dev=Gen)")
+        field(ZNAM, "Send")
+        field(ONAM, "Send")
+}
+
+record(longout, "$(Sys){$(Dev=Gen)}GoRegSingleWrite") {
+        field(DTYP, "PSC Ctrl Send")
+        field(OUT , "@Tx$(Dev=Gen)")
+        field(VAL , "1")
+        field(FLNK, "$(Sys){$(Dev=Gen)}send")
+}
+

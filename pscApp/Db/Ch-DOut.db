@@ -1,0 +1,8 @@
+#
+# INPUT=BR:A1-PS{6A:CX1}DO:PSOnOff-Cmd, OUTPUT=BR{PSC17}DO:01-Cmd
+#
+
+record(bo, "$(INPUT)")
+{
+    field(OUT, "$(OUTPUT) PP")
+}

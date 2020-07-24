@@ -1,0 +1,34 @@
+# do subsampling: 10k -> 1k
+record(aSub, "$(INPUT)-subsampling-aSub_")
+{
+    field(SNAM, "subSampling")
+    
+    field(INPA, "$(INPUT) CP")
+    field(FTA,  "FLOAT")
+    field(NOA,  "$(WF_LENGTH)")
+    
+    # get each 10-th point
+#    field(INPB, "$(INPUT)-Divider")
+    field(INPB, "$(DIVIDER)")
+    field(FTB,  "LONG") 
+    field(NOB,  "1")
+    
+    field(OUTA, "$(OUTPUT) PP")
+    field(FTVA, "FLOAT")
+    field(NOVA, "$(WF_LENGTH2)")
+}
+
+# subsampled waveform is here
+record(waveform, "$(OUTPUT)")
+{
+    field(NELM, "$(WF_LENGTH2)")
+    field(FTVL, "FLOAT")
+    
+    # sync timestamp of OUTPUT with INPUT
+    field(TSEL, "$(INPUT).TIME")
+}
+
+#record(longout,"$(INPUT)-Divider")
+#{
+#    field(VAL,  "$(DIVIDER)")
+#}

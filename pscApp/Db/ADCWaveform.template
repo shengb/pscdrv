@@ -1,0 +1,38 @@
+# ============= $(NAME) - $(msgid) ============= #
+record(waveform, "$(PSy){$(PS)}$(NAME)_Bin_") {
+	field(DTYP, "PSC Block I16 In")
+	field(INP , "@Rx$(PS) $(msgid)")
+	field(SCAN, "I/O Intr")
+	field(FTVL, "DOUBLE")
+	field(NELM, "$(WF_LENGTH)")
+	field(FLNK, "$(PSy){$(PS)}$(NAME)_asub_")
+}
+
+record(aSub, "$(PSy){$(PS)}$(NAME)_asub_")
+{
+	field(SNAM, "subADCWfProc")
+	field(INPA, "$(PSy){$(PS)}$(NAME)_Bin_.VAL")
+	field(FTA,  "DOUBLE")
+	field(NOA,  "$(WF_LENGTH)")
+	field(INPB, "$(PSy){$(PS)}$(NAME)_Bin_.NORD")
+	field(FTB,  "LONG")
+	field(NOB,  "1")
+	field(INPC, "$(PSy){$(PS)}$(NAME)_Bin_.NELM")
+	field(FTC,  "LONG")
+	field(NOC,  "1")
+	field(FTVA, "FLOAT")
+	field(NOVA, "$(WF_LENGTH)")
+	field(OUTA, "$(PSy){$(PS)}$(NAME)_Raw-I PP")
+	field(FLNK, "$(FLINK)")
+}
+
+record(waveform, "$(PSy){$(PS)}$(NAME)_Raw-I")
+{
+	field(NELM, "$(WF_LENGTH)")
+	field(FTVL, "FLOAT")
+	
+	# sync timestamp with the dedicated record whose timestamp correspond to
+	# a previos cycle start (BT0)
+	field(TSEL, "$(TIMESTAMP).TIME")
+}
+

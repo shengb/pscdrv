@@ -1,0 +1,34 @@
+# This is the index of an element which will be taken from the waveform INPUT
+record(longout, "$(INDEX)")
+{
+    field(FLNK, "$(INDEX)_asub_")
+    field(OMSL, "$(OMSL)")
+    field(DOL,  "$(DOL) CP")
+    field(PINI, "YES")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+# here the takent element will be placed
+record(ai, "$(OUTPUT)")
+{
+    # sync timestamp of OUTPUT with INPUT
+    field(TSEL, "$(INPUT).TIME")
+}
+
+record(aSub, "$(INDEX)_asub_")
+{
+    field(SNAM, "subSlice2")
+    
+    field(INPA, "$(INPUT) CP")
+    field(FTA,  "FLOAT")
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(INDEX)")
+    field(FTB,  "LONG")
+    field(NOB,  "1")
+    
+    field(NOVA, "1")
+    field(FTVA, "FLOAT")
+    field(OUTA, "$(OUTPUT) PP")
+}

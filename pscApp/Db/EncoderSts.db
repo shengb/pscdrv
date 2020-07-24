@@ -1,0 +1,982 @@
+#####
+# Encoder Interface status handling 
+# Msg ID 40. Pocket format:
+# 00 <Reg 0> <Reg 1> ... <Reg 7> // Mod0
+# 32 <Reg 0> <Reg 1> ... <Reg 7> // Mod1
+# 64 <Reg 0> <Reg 1> ... <Reg 7> // Mod2
+# ...
+#####
+
+##### Mod0 enc_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):1}Enc:Reg0-RB_") {
+    field(DESC, "Enc mod 0 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 0")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Ignore-RB")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):1}Buf:Tail-I_") {
+    field(DESC, "Circ buffer tail pointer")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 4")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Buf:Abs-I")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Fltr:dY-RB") {
+    field(DESC, "Pos filt window height RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 8")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):1}Fltr:dT-RB") {
+    field(DESC, "Pos filt window width RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 12")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):1}Cnt:Pos-I_") {
+    field(DESC, "Relative pos cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 16")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Cnt:Pos-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):1}Cnt:Pos-I") {
+    field(DESC, "Relative 3-byte pos cnt as signed int")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):1}Cnt:Pos-I_ NPP MS")
+    field(CALC, "(A & (1 << 23)) ? (A | (255 << 24)) : A")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):1}Cnt:Index-I_") {
+    field(DESC, "Chunk index cnt from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 20")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Buf:Head-I_")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):1}Cnt:Skip-I_") {
+    field(DESC, "Skip cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 28")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):1}Ignore-RB") {
+    field(DESC, "Channel data ignored RB")
+    field(DTYP, "Soft Channel")
+    field(INP , "$(Sys){$(Dev=Enc):1}Enc:Reg0-RB_.B2")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Dir:Reverse-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):1}Dir:Reverse-RB") {
+    field(DESC, "Encoder direction reversed RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):1}Enc:Reg0-RB_.B3")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):1}Buf:Head-I_") {
+    field(DESC, "Circ buffer head pointer")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):1}Cnt:Index-I_ NPP MS")
+    field(INPB, "8388607")
+    field(CALC, "A%B")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Buf:Abs-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):1}Buf:Abs-I") {
+    field(DESC, "Buffer space busy absolute bytes calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):1}Buf:Head-I_ NPP MS")
+    field(INPB, "$(Sys){$(Dev=Enc):1}Buf:Tail-I_ NPP MS")
+    field(INPC, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPD, "16") # 16-byte chunks
+    field(CALC, "(A>=B) ? (A-B)*D : (C+A-B)*D")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Buf:AbsMB-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):1}Buf:AbsMB-I") {
+    field(DESC, "Buffer space busy absolute megabytes")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):1}Buf:Abs-I NPP MS")
+    field(INPB, "1048576") # bytes in MB
+    field(PREC, "2") 
+    field(EGU,  "MB") 
+    field(CALC, "A/B")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Buf:Rel-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):1}Buf:Rel-I") {
+    field(DESC, "Buffer space left percent calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):1}Buf:Abs-I NPP MS")
+    field(INPB, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPC, "16") # 16-byte chunks
+    field(CALC, "A/(B*C)*100")
+}
+
+##### Mod1 enc_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):2}Enc:Reg0-RB_") {
+    field(DESC, "Enc module reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 32")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Ignore-RB")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):2}Buf:Tail-I_") {
+    field(DESC, "Circ buffer tail pointer")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 36")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Buf:Abs-I")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Fltr:dY-RB") {
+    field(DESC, "Pos filt window height RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 40")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):2}Fltr:dT-RB") {
+    field(DESC, "Pos filt window width RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 44")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):2}Cnt:Pos-I_") {
+    field(DESC, "Relative pos cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 48")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Cnt:Pos-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):2}Cnt:Pos-I") {
+    field(DESC, "Relative 3-byte pos cnt as signed int")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):2}Cnt:Pos-I_ NPP MS")
+    field(CALC, "(A & (1 << 23)) ? (A | (255 << 24)) : A")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):2}Cnt:Index-I_") {
+    field(DESC, "Chunk index cnt from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 52")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Buf:Head-I_")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):2}Cnt:Skip-I_") {
+    field(DESC, "Skip cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 60")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):2}Ignore-RB") {
+    field(DESC, "Channel data ignored RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):2}Enc:Reg0-RB_.B2")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Dir:Reverse-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):2}Dir:Reverse-RB") {
+    field(DESC, "Encoder direction reversed RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):2}Enc:Reg0-RB_.B3")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):2}Buf:Head-I_") {
+    field(DESC, "Circ buffer head pointer")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):2}Cnt:Index-I_ NPP MS")
+    field(INPB, "8388607")
+    field(CALC, "A%B")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Buf:Abs-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):2}Buf:Abs-I") {
+    field(DESC, "Buffer space busy absolute bytes calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):2}Buf:Head-I_ NPP MS")
+    field(INPB, "$(Sys){$(Dev=Enc):2}Buf:Tail-I_ NPP MS")
+    field(INPC, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPD, "16") # 16-byte chunks
+    field(CALC, "(A>=B) ? (A-B)*D : (C+A-B)*D")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Buf:AbsMB-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):2}Buf:AbsMB-I") {
+    field(DESC, "Buffer space busy absolute megabytes")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):2}Buf:Abs-I NPP MS")
+    field(INPB, "1048576") # bytes in MB
+    field(PREC, "2")
+    field(EGU,  "MB") 
+    field(CALC, "A/B")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Buf:Rel-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):2}Buf:Rel-I") {
+    field(DESC, "Buffer space left percent calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):2}Buf:Abs-I NPP MS")
+    field(INPB, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPC, "16") # 16-byte chunks
+    field(CALC, "A/(B*C)*100")
+}
+
+##### Mod2 enc_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):3}Enc:Reg0-RB_") {
+    field(DESC, "Enc module reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 64")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Ignore-RB")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):3}Buf:Tail-I_") {
+    field(DESC, "Circ buffer tail pointer")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 68")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Buf:Abs-I")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Fltr:dY-RB") {
+    field(DESC, "Pos filt window height RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 72")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):3}Fltr:dT-RB") {
+    field(DESC, "Pos filt window width RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 76")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):3}Cnt:Pos-I_") {
+    field(DESC, "Relative pos cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 80")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Cnt:Pos-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):3}Cnt:Pos-I") {
+    field(DESC, "Relative 3-byte pos cnt as signed int")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):3}Cnt:Pos-I_ NPP MS")
+    field(CALC, "(A & (1 << 23)) ? (A | (255 << 24)) : A")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):3}Cnt:Index-I_") {
+    field(DESC, "Chunk index cnt from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 84")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Buf:Head-I_")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):3}Cnt:Skip-I_") {
+    field(DESC, "Skip cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 92")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):3}Ignore-RB") {
+    field(DESC, "Channel data ignored RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):3}Enc:Reg0-RB_.B2")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Dir:Reverse-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):3}Dir:Reverse-RB") {
+    field(DESC, "Encoder direction reversed RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):3}Enc:Reg0-RB_.B3")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):3}Buf:Head-I_") {
+    field(DESC, "Circ buffer head pointer")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):3}Cnt:Index-I_ NPP MS")
+    field(INPB, "8388607")
+    field(CALC, "A%B")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Buf:Abs-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):3}Buf:Abs-I") {
+    field(DESC, "Buffer space busy absolute bytes calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):3}Buf:Head-I_ NPP MS")
+    field(INPB, "$(Sys){$(Dev=Enc):3}Buf:Tail-I_ NPP MS")
+    field(INPC, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPD, "16") # 16-byte chunks
+    field(CALC, "(A>=B) ? (A-B)*D : (C+A-B)*D")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Buf:AbsMB-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):3}Buf:AbsMB-I") {
+    field(DESC, "Buffer space busy absolute megabytes")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):3}Buf:Abs-I NPP MS")
+    field(INPB, "1048576") # bytes in MB
+    field(PREC, "2")
+    field(EGU,  "MB") 
+    field(CALC, "A/B")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Buf:Rel-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):3}Buf:Rel-I") {
+    field(DESC, "Buffer space left percent calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):3}Buf:Abs-I NPP MS")
+    field(INPB, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPC, "16") # 16-byte chunks
+    field(CALC, "A/(B*C)*100")
+}
+
+##### Mod3 enc_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):4}Enc:Reg0-RB_") {
+    field(DESC, "Enc module reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 96")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Ignore-RB")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):4}Buf:Tail-I_") {
+    field(DESC, "Circ buffer tail pointer")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 100")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Buf:Abs-I")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Fltr:dY-RB") {
+    field(DESC, "Pos filt window height RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 104")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):4}Fltr:dT-RB") {
+    field(DESC, "Pos filt window width RB from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 108")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):4}Cnt:Pos-I_") {
+    field(DESC, "Relative pos cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 112")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Cnt:Pos-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):4}Cnt:Pos-I") {
+    field(DESC, "Relative 3-byte pos cnt as signed int")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):4}Cnt:Pos-I_ NPP MS")
+    field(CALC, "(A & (1 << 23)) ? (A | (255 << 24)) : A")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):4}Cnt:Index-I_") {
+    field(DESC, "Chunk index cnt from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 116")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Buf:Head-I_")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):4}Cnt:Skip-I_") {
+    field(DESC, "Skip cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 124")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):4}Ignore-RB") {
+    field(DESC, "Channel data ignored RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):4}Enc:Reg0-RB_.B2")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Dir:Reverse-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):4}Dir:Reverse-RB") {
+    field(DESC, "Encoder direction reversed RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):4}Enc:Reg0-RB_.B3")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):4}Buf:Head-I_") {
+    field(DESC, "Circ buffer head pointer")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):4}Cnt:Index-I_ NPP MS")
+    field(INPB, "8388607")
+    field(CALC, "A%B")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Buf:Abs-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):4}Buf:Abs-I") {
+    field(DESC, "Buffer space busy absolute bytes calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):4}Buf:Head-I_ NPP MS")
+    field(INPB, "$(Sys){$(Dev=Enc):4}Buf:Tail-I_ NPP MS")
+    field(INPC, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPD, "16") # 16-byte chunks
+    field(CALC, "(A>=B) ? (A-B)*D : (C+A-B)*D")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Buf:AbsMB-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):4}Buf:AbsMB-I") {
+    field(DESC, "Buffer space busy absolute megabytes")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):4}Buf:Abs-I NPP MS")
+    field(INPB, "1048576") # bytes in MB
+    field(PREC, "2")
+    field(EGU,  "MB") 
+    field(CALC, "A/B")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Buf:Rel-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):4}Buf:Rel-I") {
+    field(DESC, "Buffer space left percent calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):4}Buf:Abs-I NPP MS")
+    field(INPB, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPC, "16") # 16-byte chunks
+    field(CALC, "A/(B*C)*100")
+}
+
+##### Mod4 enc_dummy_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):1}EncDummy:Reg0-RB_") {
+    field(DESC, "Enc dummy module 4 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 128")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Mod:Gen-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Gen:StepNum-RB") {
+    field(DESC, "Ch1 generation step number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 130")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Gen:CycNum-RB") {
+    field(DESC, "Ch1 generation cycle number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 132")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Gen:StepT-RB") {
+    field(DESC, "Ch1 generation step length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 134")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Gen:CycT-RB") {
+    field(DESC, "Ch1 generation cycle length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 136")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):1}Mod:Gen-RB") {
+    field(DESC, "Ch1 generation mode RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):1}EncDummy:Reg0-RB_.BF")
+    field(SCAN, "Passive")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc):1}Dsbl:Driver-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):1}Dsbl:Driver-RB") {
+    field(DESC, "Ch1 output driver disable RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):1}EncDummy:Reg0-RB_.BC")
+    field(SCAN, "Passive")
+    field(ZNAM, "Enabled")
+    field(ONAM, "Disabled")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Lvl:StepNum-I") {
+    field(DESC, "Ch1 leveling steps to pursue actual pos")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 146")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):1}Lvl:SkipCnt-I") {
+    field(DESC, "Ch1 leveling failed dist too high cnt")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 152")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod5 enc_dummy_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):2}EncDummy:Reg0-RB_") {
+    field(DESC, "Enc dummy module 5 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 160")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Mod:Gen-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Gen:StepNum-RB") {
+    field(DESC, "Ch2 generation step number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 162")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Gen:CycNum-RB") {
+    field(DESC, "Ch2 generation cycle number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 164")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Gen:StepT-RB") {
+    field(DESC, "Ch2 generation step length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 166")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Gen:CycT-RB") {
+    field(DESC, "Ch2 generation cycle length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 168")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):2}Dsbl:Driver-RB") {
+    field(DESC, "Ch2 output driver disable RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):2}EncDummy:Reg0-RB_.BC")
+    field(SCAN, "Passive")
+    field(ZNAM, "Enabled")
+    field(ONAM, "Disabled")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):2}Mod:Gen-RB") {
+    field(DESC, "Ch2 generation mode RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):2}EncDummy:Reg0-RB_.BF")
+    field(SCAN, "Passive")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc):2}Dsbl:Driver-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Lvl:StepNum-I") {
+    field(DESC, "Ch2 leveling steps to pursue actual pos")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 178")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):2}Lvl:SkipCnt-I") {
+    field(DESC, "Ch2 leveling failed dist too high cnt")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 182")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod6 enc_dummy_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):3}EncDummy:Reg0-RB_") {
+    field(DESC, "Enc dummy module 6 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 192")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Mod:Gen-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Gen:StepNum-RB") {
+    field(DESC, "Ch3 generation step number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 194")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Gen:CycNum-RB") {
+    field(DESC, "Ch3 generation cycle number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 196")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Gen:StepT-RB") {
+    field(DESC, "Ch3 generation step length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 198")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Gen:CycT-RB") {
+    field(DESC, "Ch3 generation cycle length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 200")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):3}Dsbl:Driver-RB") {
+    field(DESC, "Ch3 output driver disable RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):3}EncDummy:Reg0-RB_.BC")
+    field(SCAN, "Passive")
+    field(ZNAM, "Enabled")
+    field(ONAM, "Disabled")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):3}Mod:Gen-RB") {
+    field(DESC, "Ch3 generation mode RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):3}EncDummy:Reg0-RB_.BF")
+    field(SCAN, "Passive")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc):3}Dsbl:Driver-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Lvl:StepNum-I") {
+    field(DESC, "Ch3 leveling steps to pursue actual pos")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 210")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):3}Lvl:SkipCnt-I") {
+    field(DESC, "Ch3 leveling failed dist too high cnt")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 216")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod7 enc_dummy_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):4}EncDummy:Reg0-RB_") {
+    field(DESC, "Enc dummy module 7 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 224")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Mod:Gen-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Gen:StepNum-RB") {
+    field(DESC, "Ch4 generation step number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 226")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Gen:CycNum-RB") {
+    field(DESC, "Ch4 generation cycle number RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 228")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Gen:StepT-RB") {
+    field(DESC, "Ch4 generation step length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 230")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Gen:CycT-RB") {
+    field(DESC, "Ch4 generation cycle length RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 232")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):4}Dsbl:Driver-RB") {
+    field(DESC, "Ch4 output driver disable RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):4}EncDummy:Reg0-RB_.BC")
+    field(SCAN, "Passive")
+    field(ZNAM, "Enabled")
+    field(ONAM, "Disabled")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):4}Mod:Gen-RB") {
+    field(DESC, "Ch4 generation mode RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc):4}EncDummy:Reg0-RB_.BF")
+    field(SCAN, "Passive")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc):4}Dsbl:Driver-RB")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Lvl:StepNum-I") {
+    field(DESC, "Ch4 leveling steps to pursue actual pos")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 242")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(Dev=Enc):4}Lvl:SkipCnt-I") {
+    field(DESC, "Ch4 leveling failed dist too high cnt")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 248")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod8 evr_dummy_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc)}EvrDummy:Reg0-RB_") {
+    field(DESC, "EVR module reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 256")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc)}T:Internal-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc)}T:Internal-RB") {
+    field(DESC, "Timestamp select RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc)}EvrDummy:Reg0-RB_.B1")
+    field(SCAN, "Passive")
+    field(ZNAM, "External")
+    field(ONAM, "Internal")
+}
+
+record(longin, "$(Sys){$(Dev=Enc)}T:sec-I") {
+    field(DESC, "Device timestamp, seconds")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 280")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc)}T:nsec-RB") {
+    field(DESC, "TS to be set, nanoseconds")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 264")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc)}T:sec-RB") {
+    field(DESC, "TS to be set, seconds")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 260")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod9 pulsegen_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc)-DO}Reg2_MSB-RB_") {
+    field(DESC, "Pulsegen module reg 2 MSB 16-bit raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 294")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:1}Src-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc)-DO:1}Src-RB") {
+    field(DESC, "Pulsegen DO state RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc)-DO}Reg2_MSB-RB_.B0")
+    field(SCAN, "Passive")
+}
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc)-DO}Reg2_LSB-RB_") {
+    field(DESC, "Pulsegen module reg 2 LSB 16-bit raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 296")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:0}Src-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc)-DO:0}Src-RB") {
+    field(DESC, "Pulsegen DO state RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc)-DO}Reg2_LSB-RB_.B0")
+    field(SCAN, "Passive")
+}
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc)-DO}Reg3_MSB-RB_") {
+    field(DESC, "Pulsegen module reg 2 MSB 16-bit raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 298")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:3}Src-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc)-DO:3}Src-RB") {
+    field(DESC, "Pulsegen DO state RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc)-DO}Reg3_MSB-RB_.B0")
+    field(SCAN, "Passive")
+}
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc)-DO}Reg3_LSB-RB_") {
+    field(DESC, "Pulsegen module reg 2 LSB 16-bit raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 300")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:2}Src-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Enc)-DO:2}Src-RB") {
+    field(DESC, "Pulsegen DO state RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Enc)-DO}Reg3_LSB-RB_.B0")
+    field(SCAN, "Passive")
+}
+
+record(longin, "$(Sys){$(Dev=Enc)-DO}T:nsec-I") {
+    field(DESC, "TS of last pulsegen Do transition, nsec")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 304")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc)-DO}T:sec-I") {
+    field(DESC, "TS of last pulsegen Do transition, sec")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 308")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod11 io_scan_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Enc):DI}Reg0-RB_") {
+    field(DESC, "io_scan mod 0 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 352")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):DI}Ignore-RB")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):DI}Buf:Tail-I_") {
+    field(DESC, "Circ buffer tail pointer")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 356")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):DI}Buf:Abs-I")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):DI}Cnt:Index-I_") {
+    field(DESC, "Chunk index cnt from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 372")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Enc):DI}Buf:Head-I_")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):DI}Raw:Data-I_") {
+    field(DESC, "Raw data read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 376")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Enc):DI}Cnt:Skip-I_") {
+    field(DESC, "Skip cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Enc) 40 380")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(Dev=Enc):DI}Ignore-RB") {
+    field(DESC, "Channel data ignored RB")
+    field(DTYP, "Soft Channel")
+    field(INP , "$(Sys){$(Dev=Enc):DI}Reg0-RB_.B2")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):DI}Buf:Head-I_") {
+    field(DESC, "Circ buffer head pointer")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):DI}Cnt:Index-I_ NPP MS")
+    field(INPB, "8388607")
+    field(CALC, "A%B")
+    field(FLNK, "$(Sys){$(Dev=Enc):DI}Buf:Abs-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):DI}Buf:Abs-I") {
+    field(DESC, "Buffer space busy absolute bytes calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):DI}Buf:Head-I_ NPP MS")
+    field(INPB, "$(Sys){$(Dev=Enc):DI}Buf:Tail-I_ NPP MS")
+    field(INPC, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPD, "16") # 16-byte chunks
+    field(CALC, "(A>=B) ? (A-B)*D : (C+A-B)*D")
+    field(FLNK, "$(Sys){$(Dev=Enc):DI}Buf:AbsMB-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):DI}Buf:AbsMB-I") {
+    field(DESC, "Buffer space busy absolute megabytes")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):DI}Buf:Abs-I NPP MS")
+    field(INPB, "1048576") # bytes in MB
+    field(PREC, "2") 
+    field(EGU,  "MB") 
+    field(CALC, "A/B")
+    field(FLNK, "$(Sys){$(Dev=Enc):DI}Buf:Rel-I")
+}
+
+record(calcout, "$(Sys){$(Dev=Enc):DI}Buf:Rel-I") {
+    field(DESC, "Buffer space left percent calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(Dev=Enc):DI}Buf:Abs-I NPP MS")
+    field(INPB, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPC, "16") # 16-byte chunks
+    field(CALC, "A/(B*C)*100")
+}
+

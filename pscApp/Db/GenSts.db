@@ -1,0 +1,230 @@
+#####
+# General Purpose DAQ board status handling 
+# Msg ID 40. Pocket format:
+# 00 <Reg 0> <Reg 1> ... <Reg 7> // Mod0
+# 32 <Reg 0> <Reg 1> ... <Reg 7> // Mod1
+# 64 <Reg 0> <Reg 1> ... <Reg 7> // Mod2
+# ...
+#####
+
+##### Mod0 spiadc_v1_01 #####
+
+record(mbbiDirect, "$(Sys){$(ADC=GP-ADC):1}GP-ADC:Reg0-RB_") {
+    field(DESC, "GP-ADC mod 0 reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 0")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(ADC=GP-ADC):1}Ena-RB")
+}
+
+record(longin, "$(Sys){$(ADC=GP-ADC):1}Buf:Tail-I_") {
+    field(DESC, "Circ buffer tail pointer")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 4")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(ADC=GP-ADC):1}Buf:Abs-I")
+}
+
+record(longin, "$(Sys){$(ADC=GP-ADC):1}F:Sample-I_") {
+    field(DESC, "Sample rate readback")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 8")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(ADC=GP-ADC):1}Cnt:Index-I_") {
+    field(DESC, "Chunk index cnt from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 20")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(ADC=GP-ADC):1}Buf:Head-I_")
+}
+
+record(longin, "$(Sys){$(ADC=GP-ADC):1}Cnt:Skip-I_") {
+    field(DESC, "Skip cnt read from reg")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 28")
+    field(SCAN, "I/O Intr")
+}
+
+record(bi, "$(Sys){$(ADC=GP-ADC):1}Ena-RB") {
+    field(DESC, "Channel data ignored RB")
+    field(DTYP, "Soft Channel")
+    field(INP , "$(Sys){$(ADC=GP-ADC):1}GP-ADC:Reg0-RB_.B2")
+    field(SCAN, "Passive")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+}
+
+record(calcout, "$(Sys){$(ADC=GP-ADC):1}Buf:Head-I_") {
+    field(DESC, "Circ buffer head pointer")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(ADC=GP-ADC):1}Cnt:Index-I_ NPP MS")
+    field(INPB, "8388607")
+    field(CALC, "A%B")
+    field(FLNK, "$(Sys){$(ADC=GP-ADC):1}Buf:Abs-I")
+}
+
+record(calcout, "$(Sys){$(ADC=GP-ADC):1}Buf:Abs-I") {
+    field(DESC, "Buffer space busy absolute bytes calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(ADC=GP-ADC):1}Buf:Head-I_ NPP MS")
+    field(INPB, "$(Sys){$(ADC=GP-ADC):1}Buf:Tail-I_ NPP MS")
+    field(INPC, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPD, "16") # 16-byte chunks
+    field(CALC, "(A>=B) ? (A-B)*D : (C+A-B)*D")
+    field(FLNK, "$(Sys){$(ADC=GP-ADC):1}Buf:AbsMB-I")
+}
+
+record(calcout, "$(Sys){$(ADC=GP-ADC):1}Buf:AbsMB-I") {
+    field(DESC, "Buffer space busy absolute megabytes")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(ADC=GP-ADC):1}Buf:Abs-I NPP MS")
+    field(INPB, "1048576") # bytes in MB
+    field(PREC, "2") 
+    field(EGU,  "MB") 
+    field(CALC, "A/B")
+    field(FLNK, "$(Sys){$(ADC=GP-ADC):1}Buf:Rel-I")
+}
+
+record(calcout, "$(Sys){$(ADC=GP-ADC):1}Buf:Rel-I") {
+    field(DESC, "Buffer space left percent calc")
+    field(SCAN, "Passive")
+    field(INPA, "$(Sys){$(ADC=GP-ADC):1}Buf:Abs-I NPP MS")
+    field(INPB, "8388607") # 128Mb circ buffer filled with 16-byte chunks
+    field(INPC, "16") # 16-byte chunks
+    field(CALC, "A/(B*C)*100")
+}
+
+##### Mod3 evr_dummy_v1_00 #####
+
+record(mbbiDirect, "$(Sys){$(Dev=Gen)}EvrDummy:Reg0-RB_") {
+    field(DESC, "EVR module reg 0 raw RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 64")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(Dev=Gen)}T:Internal-RB")
+}
+
+record(bi, "$(Sys){$(Dev=Gen)}T:Internal-RB") {
+    field(DESC, "Timestamp select RB")
+    field(DTYP, "Soft Channel")
+    field(INP,  "$(Sys){$(Dev=Gen)}EvrDummy:Reg0-RB_.B1")
+    field(SCAN, "Passive")
+    field(ZNAM, "External")
+    field(ONAM, "Internal")
+}
+
+record(longin, "$(Sys){$(Dev=Gen)}T:sec-I") {
+    field(DESC, "Device timestamp, seconds")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 88")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Gen)}T:nsec-RB") {
+    field(DESC, "TS to be set, nanoseconds")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 72")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(Sys){$(Dev=Gen)}T:sec-RB") {
+    field(DESC, "TS to be set, seconds")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 68")
+    field(SCAN, "I/O Intr")
+}
+
+##### Mod9 spidac_v1_00 #####
+
+record(mbbi, "$(Sys){$(DAC=GP-DAC):1}E:A-RB") {
+    field(DESC, "DAC 1 Ch A voltage RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 264")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E_Raw:A-RB")
+}
+
+record(calc, "$(Sys){$(DAC=GP-DAC):1}E_Raw:A-RB") {
+    field(DESC, "DAC output voltage 2's comp RB")
+    field(SCAN, "Passive")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:A-RB NPP MS")
+    field(CALC, "(A & 0x8000) ? (((~A & 0x7FFF) + 1)* -10.0/32768.0) : (A * 10.0/32768.0)")
+}
+
+record(mbbi, "$(Sys){$(DAC=GP-DAC):1}E:B-RB") {
+    field(DESC, "DAC 1 Ch B voltage RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 262")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E_Raw:B-RB")
+}
+
+record(calc, "$(Sys){$(DAC=GP-DAC):1}E_Raw:B-RB") {
+    field(DESC, "DAC output voltage 2's comp RB")
+    field(SCAN, "Passive")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:B-RB NPP MS")
+    field(CALC, "(A & 0x8000) ? (((~A & 0x7FFF) + 1)* -10.0/32768.0) : (A * 10.0/32768.0)")
+}
+
+record(mbbi, "$(Sys){$(DAC=GP-DAC):1}E:C-RB") {
+    field(DESC, "DAC 1 Ch C voltage RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 268")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E_Raw:C-RB")
+}
+
+record(calc, "$(Sys){$(DAC=GP-DAC):1}E_Raw:C-RB") {
+    field(DESC, "DAC output voltage 2's comp RB")
+    field(SCAN, "Passive")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:C-RB NPP MS")
+    field(CALC, "(A & 0x8000) ? (((~A & 0x7FFF) + 1)* -10.0/32768.0) : (A * 10.0/32768.0)")
+}
+
+record(mbbi, "$(Sys){$(DAC=GP-DAC):1}E:D-RB") {
+    field(DESC, "DAC 1 Ch D voltage RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 266")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(Sys){$(DAC=GP-DAC):1}E_Raw:D-RB")
+}
+
+record(calc, "$(Sys){$(DAC=GP-DAC):1}E_Raw:D-RB") {
+    field(DESC, "DAC output voltage 2's comp RB")
+    field(SCAN, "Passive")
+    field(EGU, "V")
+    field(PREC, "3")
+    field(INPA, "$(Sys){$(DAC=GP-DAC):1}E:D-RB NPP MS")
+    field(CALC, "(A & 0x8000) ? (((~A & 0x7FFF) + 1)* -10.0/32768.0) : (A * 10.0/32768.0)")
+}
+
+##### Mod11 spidac_v1_00 #####
+
+record(mbbi, "$(Sys){$(GPIO=GP-GPIO)}Dir-RB") {
+    field(DESC, "GPIO Output enable RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 328")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(GPIO=GP-GPIO)}Out-RB") {
+    field(DESC, "GPIO Output state RB")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 332")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(Sys){$(GPIO=GP-GPIO)}In-RB") {
+    field(DESC, "GPIO Input state")
+    field(DTYP, "PSC Reg")
+    field(INP , "@Rx$(Dev=Gen) 40 348")
+    field(SCAN, "I/O Intr")
+}

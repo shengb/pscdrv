@@ -1,0 +1,58 @@
+##################################
+### Channel Monitoring records ###
+### v.1.1.1 16 Apr 2014        ###
+### Pavel Cheblakov, 2013-2014 ###
+##################################
+
+# Channel that holds reference data
+record(bi, "$(CH_REF)")
+{
+    info(autosaveFields_pass0, "VAL")
+}
+
+# Value to be archived
+# It contains the same data as $(CH) and processed only 
+# when it is updated due to binary state of this channel
+record(bi, "$(CH_ARCH)")
+{
+    field(INP, "$(CH) CP")
+    
+    # sync timestam of CH_ARCH with CH
+    field(TSEL, "$(CH).TIME")
+}
+
+# if we want provide "Off mode" for monitoring we should
+# uncomment the record below and pass to this db-file
+# additional parametr MODE_PV to get this information.
+# (to know when Off-mode is choosen)
+#
+#record(calcout, "$(CH)Off_enbl_calcout_")
+#{
+#    field(INPA, "$(MODE_PV) CP")
+#
+#    field(CALC, "A = 0 ? -100 : 0")
+#    field(OOPT, "When Non-zero")
+#    field(PINI, "YES")
+#
+#    field(OUT,  "$(CH_FLG) PP")
+#}
+
+record(ai, "$(CH_FLG)")
+{
+    # 0.0 - Ok
+    # 2.0 - Achtung!
+    
+    field(HOPR, "2.0")
+    field(LOPR, "-100.0")
+
+    field(HIHI, "2.0")
+    field(HHSV, "MAJOR")
+
+    field(LOLO, "-100.0")
+    field(LLSV,  "MAJOR")
+    
+    # we define CH_FLGARCH as alias for CH_FLG
+    # because of CH should be archieved each time
+    # when it is changed
+    alias("$(CH_FLGARCH)")
+}

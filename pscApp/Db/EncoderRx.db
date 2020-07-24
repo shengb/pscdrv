@@ -1,0 +1,162 @@
+#####
+# Encoder Interface Chan $(Chan) input waveform
+#####
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}T:sec_Bin_") {
+	field(DESC, "Timestamp seconds part unformatted")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Enc) $(ID) 0 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+        field(FLNK, "$(Sys){$(Dev=Enc):$(Chan)}Format_asub_")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}T:nsec_Bin_") {
+	field(DESC, "Timestamp nanoseconds part unformatted")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Enc) $(ID) 4 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+#	field(FLNK, "$(Sys){$(Dev=Enc):$(Chan)}TS_asub_")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}Cnt:Index_Bin_") {
+	field(DESC, "Enc chunk number index counter")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Enc) $(ID) 8 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}Cnt:Pos_Bin_") {
+	field(DESC, "Encoder relative position counter")
+        field(DTYP, "PSC Block I32 In")
+        field(INP , "@Rx$(Dev=Enc) $(ID) 12 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}Data_Bin_") {
+	field(DESC, "Encoder misc diag data")
+        field(DTYP, "PSC Block I16 In")
+        field(INP , "@Rx$(Dev=Enc) $(ID) 14 16")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "DOUBLE")
+        field(NELM, "1024")
+#        field(FLNK, "$(Sys){$(Dev=Enc):$(Chan)}AB_asub_")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}Stream_Bin_") {
+	field(DESC, "Raw stream from encoder")
+        field(DTYP, "PSC Block I8 In")
+        field(INP , "@Rx$(Dev=Enc) $(ID)")
+        field(SCAN, "I/O Intr")
+        field(FTVL, "UCHAR")
+        field(NELM, "16384")
+#        field(FLNK, "$(Sys){$(Dev=Enc):$(Chan)}Stream_asub_")
+}
+
+record(aSub, "$(Sys){$(Dev=Enc):$(Chan)}Format_asub_")
+{
+        field(SNAM, "subEncFormatProc")
+        field(INPA, "$(Sys){$(Dev=Enc):$(Chan)}T:sec_Bin_.VAL")
+        field(FTA,  "DOUBLE")
+        field(NOA,  "1024")
+        field(INPB, "$(Sys){$(Dev=Enc):$(Chan)}T:nsec_Bin_.VAL")
+        field(FTB,  "DOUBLE")
+        field(NOB,  "1024")
+        field(INPC, "$(Sys){$(Dev=Enc):$(Chan)}Cnt:Pos_Bin_.VAL")
+        field(FTC,  "DOUBLE")
+        field(NOC,  "1024")
+        field(INPD, "$(Sys){$(Dev=Enc):$(Chan)}Cnt:Index_Bin_.VAL")
+        field(FTD,  "DOUBLE")
+        field(NOD,  "1024")
+        field(INPE, "$(Sys){$(Dev=Enc):$(Chan)}Data_Bin_.VAL")
+        field(FTE,  "DOUBLE")
+        field(NOE,  "1024")
+        field(FTG,  "STRING")
+  	field(INPG, "$(Sys){$(Dev=Enc):$(Chan)}ID:File.VAL")
+        field(DISV, "1")
+        field(SDIS, "$(Sys){$(Dev=Enc):$(Chan)}ID:File.UDF")
+	field(OUTA, "$(Sys){$(Dev=Enc):$(Chan)}FileSize PP")
+}
+
+record(stringin, "$(Sys){$(Dev=Enc):$(Chan)}ID:File") {
+	field(DTYP, "Soft Channel")
+	field(INP, "/home/rkadyrov/EncoderData/format_ch$(Chan).out")
+	field(PINI, "YES")
+	field(DISV, "0")	
+	field(SDIS, "$(Sys){$(Dev=Enc):$(Chan)}Ignore-RB")	
+	info(autosaveFields_pass0, "VAL")
+}
+
+record(ai, "$(Sys){$(Dev=Enc):$(Chan)}FileSize") {
+	field(DTYP, "Soft Channel")
+	field(DESC, "Out File Size, MB")	
+	field(EGU, "MB")	
+}
+
+record(aSub, "$(Sys){$(Dev=Enc):$(Chan)}Stream_asub_")
+{
+        field(SNAM, "subEncStreamProc")
+        field(INPA, "$(Sys){$(Dev=Enc):$(Chan)}Stream_Bin_.VAL")
+        field(FTA,  "UCHAR")
+        field(NOA,  "16384")
+        field(FTB,  "STRING")
+  	field(INPB, "$(Sys){$(Dev=Enc):$(Chan)}ID:File")
+}
+
+record(aSub, "$(Sys){$(Dev=Enc):$(Chan)}TS_asub_")
+{
+        field(SNAM, "subEncTSProc")
+        field(INPA, "$(Sys){$(Dev=Enc):$(Chan)}T:sec_Bin_.VAL")
+        field(FTA,  "DOUBLE")
+        field(NOA,  "1024")
+        field(INPB, "$(Sys){$(Dev=Enc):$(Chan)}T:nsec_Bin_.VAL")
+        field(FTB,  "DOUBLE")
+        field(NOB,  "1024")
+        field(FTVA, "DOUBLE")
+        field(NOVA, "1024")
+        field(OUTA, "$(Sys){$(Dev=Enc):$(Chan)}TS-I PP")
+        field(FLNK, "")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}TS-I")
+{
+	field(DESC, "Combined timestamp")
+        field(NELM, "1024")
+        field(FTVL, "DOUBLE")
+}
+
+record(aSub, "$(Sys){$(Dev=Enc):$(Chan)}AB_asub_")
+{
+        field(SNAM, "subEncABProc")
+        field(INPA, "$(Sys){$(Dev=Enc):$(Chan)}Data_Bin_.VAL")
+        field(FTA,  "DOUBLE")
+        field(NOA,  "1024")
+        field(FTVA, "UCHAR")
+        field(NOVA, "1024")
+        field(OUTA, "$(Sys){$(Dev=Enc):$(Chan)}A-Sts PP")
+        field(FTVB, "UCHAR")
+        field(NOVB, "1024")
+        field(OUTB, "$(Sys){$(Dev=Enc):$(Chan)}B-Sts PP")
+        field(FLNK, "")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}Sts:A-Sts")
+{
+	field(DESC, "Encoder A line state")
+        field(NELM, "1024")
+        field(FTVL, "UCHAR")
+}
+
+record(waveform, "$(Sys){$(Dev=Enc):$(Chan)}Sts:B-Sts")
+{
+	field(DESC, "Encoder B line state")
+        field(NELM, "1024")
+        field(FTVL, "UCHAR")
+}

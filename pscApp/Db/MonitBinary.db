@@ -1,0 +1,48 @@
+##################################
+### Channel Monitoring records ###
+### v.1.1.1 16 Apr 2014        ###
+### Pavel Cheblakov, 2013-2014 ###
+##################################
+
+# Enable or disable monitoring
+record(calcout, "$(CH)$(MODE)_enbl_calcout_")
+{
+    field(INPA, "$(MODE_PV) CP")
+    field(INPB, "$(MODE)")
+    field(INPC, "$(ENABLED)")
+    
+    field(CALC, "A = B && C")
+    field(OOPT, "Every Time")
+    field(PINI, "YES")
+
+    field(OUT,  "$(CH)$(MODE)_Sub_.DISV PP")
+    field(FLNK, "$(CH)$(MODE)_enbl2_calcout_")
+}
+
+record(calcout, "$(CH)$(MODE)_enbl2_calcout_")
+{
+    field(INPA, "$(MODE_PV)")
+    field(INPB, "$(MODE)")
+    field(INPC, "$(ENABLED)")
+    
+    field(CALC, "A = B && C = 0 ? -10 : 0")
+    field(OOPT, "When Non-zero")
+    field(PINI, "YES")
+
+    field(OUT,  "$(CH_FLG) PP")
+}
+
+###########################
+
+record(calcout, "$(CH)$(MODE)_Sub_")
+{
+    field(INPA, "$(CH) CP")
+    field(INPB, "$(CH_REF) CP")
+    field(INPC, "$(MODE_PV)")
+
+    field(CALC, "(A = B) ? 0 : 2")
+
+    field(OOPT, "Every Time")
+    
+    field(OUT,  "$(CH_FLG) PP")
+}

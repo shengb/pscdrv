@@ -1,0 +1,458 @@
+#----------- PSC command related PVs -------------------------------------#
+# The command frame ID is: 80. Frame length is: 128. Socket: Tx (port 7)  #
+
+#Tx Connection PV
+record(bi, "$(PriSys){$(PS)}Txconn") {
+  field(DTYP, "PSC Ctrl Connected")
+  field(INP , "@Tx$(PS)")
+  field(SCAN, "I/O Intr")
+  field(ZNAM, "Disconnected")
+  field(ONAM, "Connected")
+  field(ZSV , "MAJOR")
+}
+
+#1st register four bytes = [Rst,PscEnable,RampEnable,Mode]
+record(bo,"$(PriSys){$(PS)}Rst:PSC-Cmd")
+{
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 0")
+	field(DESC, "PSC Reset")
+        field(MASK, "0x1000000") 
+	field(ZNAM, "Sys Reset")
+	field(ONAM, "Sys Normal")
+	field(DESC, "PSC Reset")
+	field(PINI, "YES")
+	
+    info(autosaveFields_pass0, "RVAL")
+}
+record(bo,"$(PriSys){$(PS)}Enbl:PSC-Cmd")
+{
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 0")
+	field(DESC, "PSC Reset")
+        field(MASK, "0x10000") 
+	field(ZNAM, "PSC Disable")
+	field(ONAM, "PSC Enable")
+	field(DESC, "PSC Enable")
+	field(PINI, "YES")
+		
+    info(autosaveFields_pass0, "RVAL")
+}
+record(bo,"$(PriSys){$(PS)}Enbl:Ramp-Cmd")
+{
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 0")
+	field(DESC, "PSC Reset")
+        field(MASK, "0x100") 
+	field(ZNAM, "Ramping Disable")
+	field(ONAM, "Ramping Enable")
+	field(DESC, "PSC Ramping Enable")
+	field(PINI, "YES")		
+	
+    info(autosaveFields_pass0, "RVAL")
+}
+record(mbbo, "$(PriSys){$(PS)}Mode:PSC-Sel") {
+	field(DTYP, "PSC Reg")
+        field(OUT , "@Tx$(PS) 80 0")
+	field(NOBT, "2")
+	field(SHFT, "0") # select bits 3 and 4
+	field(ZRST, "Stop")
+	field(ONST, "Static Mode")
+	field(TWST, "Ramp Mode")
+	field(ZRVL, "0")
+	field(ONVL, "1")
+	field(TWVL, "2")
+	field(DESC, "PSC Mode")
+	field(PINI, "YES")		
+	
+    info(autosaveFields_pass0, "RVAL")
+}
+
+#2nd register: static setpoint for DAC0 in offset binary format
+record(bo,"$(PriSys){$(PS)}Pol:PSI-Cmd")
+{
+	field(DESC, "PSC Polarity")
+	field(ZNAM, "Bipolar")
+	field(ONAM, "Unipolar")
+	field(PINI, 0)
+}
+
+record(ao,"$(PriSys){$(PS)}Imp:PS1-SP")
+{
+	field(DESC, "Norminal Impedence:Amps for One Volt")
+	field(PREC, "6")
+	field(DRVL, "0.01")
+	field(DRVH, "40.0")
+	field(LOPR, "0.01")
+	field(HOPR, "40.0")
+	field(VAL, "1")
+	field(PINI, 0)
+}
+record(ao,"$(PriSys){$(PS)}DAC:0-Static-Sp")
+{
+	field(DESC, "PSC static setpoint1 in Decimal Format")
+	field(PREC, "6")
+	field(DRVL, "-10.0")
+        field(LOPR, "-10.0")
+	field(DRVH, "9.999998")
+	field(HOPR, "9.999998")
+	field(PINI, 0)
+}
+record(calcout,"$(PriSys){$(PS)}DAC:0-Static-Sp-Calc_")
+{
+	field(DESC, "Bippole/unipole convertion")
+	field(SCAN, "1 second")
+	field(INPA, "$(PriSys){$(PS)}Pol:PSI-Cmd.VAL")
+	field(INPB, "$(PriSys){$(PS)}DAC:0-Static-Sp.VAL")
+	field(INPC, "$(PriSys){$(PS)}Imp:PS1-SP.VAL")
+	field(CALC, "CEIL(((A==0)?((.5*B/C)+5.):B/C)*104857)")
+	field(OUT, "$(PriSys){$(PS)}Sp1Reg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}Sp1Reg-SP")
+}
+
+record(longout, "$(PriSys){$(PS)}Sp1Reg-SP") {
+  field(SCAN, "Passive")
+  field(DTYP, "PSC Reg")
+  field(OUT , "@Tx$(PS) 80 4")
+}
+
+#3rd register: static setpoint for DAC1 in offset binary format
+record(ao,"$(PriSys){$(PS)}Imp:PS2-SP")
+{
+	field(DESC, "Norminal Impedence:Amps for One Volt")
+	field(PREC, "6")
+	field(DRVL, "0.01")
+	field(DRVH, "40.0")
+	field(LOPR, "0.01")
+	field(HOPR, "40.0")
+	field(VAL, "1")
+	field(PINI, 0)
+}
+record(ao,"$(PriSys){$(PS)}DAC:1-Static-Sp")
+{
+	field(DESC, "PSC static setpoint1 in Decimal Format")
+	field(PREC, "6")
+	field(DRVL, "-10.0")
+        field(LOPR, "-10.0")
+	field(DRVH, "9.999998")
+	field(HOPR, "9.999998")
+	field(PINI, 0)
+}
+record(calcout,"$(PriSys){$(PS)}DAC:1-Static-Sp-Calc_")
+{
+	field(DESC, "Bippole/unipole convertion")
+	field(SCAN, "1 second")
+	field(INPA, "$(PriSys){$(PS)}Pol:PSI-Cmd.VAL")
+	field(INPB, "$(PriSys){$(PS)}DAC:1-Static-Sp.VAL")
+	field(INPC, "$(PriSys){$(PS)}Imp:PS2-SP.VAL")
+	field(CALC, "CEIL(((A==0)?((.5*B/C)+5.):B/C)*104857)")
+	field(OUT, "$(PriSys){$(PS)}Sp2Reg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}Sp2Reg-SP")
+}
+
+record(longout, "$(PriSys){$(PS)}Sp2Reg-SP") {
+  field(SCAN, "Passive")
+  field(DTYP, "PSC Reg")
+  field(OUT , "@Tx$(PS) 80 8")
+}
+
+#4th register: [bit31: clock source; bit30: clk sync sel; 2nd byte: clock dividor]
+record(bo,"$(PriSys){$(PS)}Src:Clk-Sel")
+{	
+#    field(DTYP, "PSC Reg")
+#    field(OUT , "@Tx$(PS) 80 12")
+#    field(MASK, "0x80000000") # bit 31
+    field(ZNAM, "External Clock ")
+    field(ONAM, "Internal Clock")
+    field(DESC, "Clock Source")
+#   	field(PINI, "YES")
+	
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo,"$(PriSys){$(PS)}Mode:ActRT-Sync-Sel")
+{
+#    field(DTYP, "PSC Reg")
+#    field(OUT , "@Tx$(PS) 80 12")
+#    field(MASK, "0x40000000") # bit 30
+	field(ZNAM, "1 Hz clock")
+	field(ONAM, "External trigger")
+	field(DESC, "PSC Active Table Change Permit Source")
+#   	field(PINI, "YES")	
+	
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(longout,"$(PriSys){$(PS)}Div:Clk-SP")
+{
+	field(DESC, "clock Divider")
+}
+
+record(calcout,"$(PriSys){$(PS)}ClockMode-Cal_")
+{
+	field(DESC, "PSC clock register")
+	field(INPA, "$(PriSys){$(PS)}Src:Clk-Sel.VAL")
+	field(INPB, "$(PriSys){$(PS)}Mode:ActRT-Sync-Sel.VAL")
+	field(INPC, "$(PriSys){$(PS)}Div:Clk-SP.VAL")
+	field(CALC, "(A<<31)+(B<<30)+(C<<16)")
+	field(SCAN, "1 second")
+	field(OUT, "$(PriSys){$(PS)}ClkReg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}ClkReg-SP")
+}
+
+record(longout, "$(PriSys){$(PS)}ClkReg-SP") {
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 12")
+}
+
+#5th register: break rate chan1 
+record(longout,"$(PriSys){$(PS)}Step:Ramp1-SP")
+{
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 16")
+	field(DESC, "Break Rate for PS1")
+}
+
+
+#6th register: break rate chan2
+record(longout,"$(PriSys){$(PS)}Step:Ramp2-SP")
+{
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 20")
+	field(DESC, "Break Rate for PS2")
+}
+
+#7th register: [bit31: break cmd; LSB: break end in offset binary format] for chan1
+record(bo,"$(PriSys){$(PS)}DO:RampStart1-Cmd")
+{
+	field(ZNAM, "No Break")
+	field(ONAM, "Break")
+	field(VAL,"0")
+	field(DESC, "Break Command for PS1")
+}
+
+record(calc,"$(PriSys){$(PS)}DO:RampStart1_Calc_")
+{
+	field(DESC, "Shift")
+	field(INPA, "$(PriSys){$(PS)}DO:RampStart1-Cmd.VAL")
+	field(CALC, "A<<31")
+}
+
+record(ao,"$(PriSys){$(PS)}I:RampEnd1-SP")
+{
+	field(DESC, "PSC breakEnd in Decimal Format")
+	field(PREC, "6")
+	field(PINI, 0)
+}
+
+record(calcout,"$(PriSys){$(PS)}I:RampEnd1-SP-Calc_")
+{
+	field(DESC, "Bippole/unipole convertion")
+	field(SCAN, "1 second")
+	field(INPA, "$(PriSys){$(PS)}Pol:PSI-Cmd.VAL")
+	field(INPB, "$(PriSys){$(PS)}I:RampEnd1-SP.VAL")
+	field(INPC, "$(PriSys){$(PS)}Imp:PS1-SP.VAL")
+	field(INPD, "$(PriSys){$(PS)}DO:RampStart1_Calc_.VAL PP")
+	field(CALC, "CEIL((A==0)?((.5*B/C+5):B/C)*104857)+D")
+	field(SCAN, "1 second")
+	field(OUT, "$(PriSys){$(PS)}Brk1Reg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}Brk1Reg-SP")
+}
+record(longout, "$(PriSys){$(PS)}Brk1Reg-SP") {
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 24")
+}
+
+#8th register: [bit31: break cmd; LSB: break end in offset binary format] for chan2
+record(bo,"$(PriSys){$(PS)}DO:RampStart2-Cmd")
+{
+	field(ZNAM, "No Break")
+	field(ONAM, "Break")
+	field(VAL,"0")
+	field(DESC, "Break Command for PS2")
+}
+record(calc,"$(PriSys){$(PS)}DO:RampStart2_Calc_")
+{
+	field(DESC, "Shift")
+	field(INPA, "$(PriSys){$(PS)}DO:RampStart2-Cmd.VAL")
+	field(CALC, "A<<31")
+}
+
+record(ao,"$(PriSys){$(PS)}I:RampEnd2-SP")
+{
+	field(DESC, "PSC breakEnd in Decimal Format")
+	field(PREC, "6")
+	field(PINI, 0)
+}
+
+record(calcout,"$(PriSys){$(PS)}I:RampEnd2-SP-Calc_")
+{
+	field(DESC, "Bippole/unipole convertion")
+	field(SCAN, "1 second")
+	field(INPA, "$(PriSys){$(PS)}Pol:PSI-Cmd.VAL")
+	field(INPB, "$(PriSys){$(PS)}I:RampEnd2-SP.VAL")
+	field(INPC, "$(PriSys){$(PS)}Imp:PS2-SP.VAL")
+	field(INPD, "$(PriSys){$(PS)}DO:RampStart2_Calc_.VAL PP")
+	field(CALC, "CEIL((A==0)?((.5*B/C+5):B/C)*104857)+D")
+	field(SCAN, "1 second")
+	field(OUT, "$(PriSys){$(PS)}Brk2Reg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}Brk2Reg-SP")
+}
+record(longout, "$(PriSys){$(PS)}Brk2Reg-SP") {
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 28")
+}
+
+#9th register [bit31:static/pulse digital output; bit(23:8):pulse width; bit(3:0) commands]
+record(bo,"$(PriSys){$(PS)}Mode:Dout-Sel")
+{
+	field(ZNAM, "Static")
+	field(ONAM, "Pulse")
+	field(DESC, "CMD Mode")
+	
+    info(autosaveFields_pass0, "VAL")
+}
+record(longout, "$(PriSys){$(PS)}Time:DOPlsWdt-SP")
+{
+	field(DESC, "CMD pulse width:ms")
+	
+    info(autosaveFields_pass0, "VAL")
+}
+record(bo,"$(PriSys){$(PS)}DO:0-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 0")
+}
+record(bo,"$(PriSys){$(PS)}DO:1-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 1")
+}
+record(bo,"$(PriSys){$(PS)}DO:2-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 2")
+}
+record(bo,"$(PriSys){$(PS)}DO:3-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 3")
+}
+
+record(calcout,"$(PriSys){$(PS)}DoutCmd1-Calc_")
+{
+        field(DESC, "Digital CMD1")
+        field(INPA, "$(PriSys){$(PS)}Mode:Dout-Sel.VAL")
+        field(INPB, "$(PriSys){$(PS)}Time:DOPlsWdt-SP.VAL")
+        field(INPC, "$(PriSys){$(PS)}DO:0-Cmd.VAL")
+        field(INPD, "$(PriSys){$(PS)}DO:1-Cmd.VAL")
+        field(INPE, "$(PriSys){$(PS)}DO:2-Cmd.VAL")
+        field(INPF, "$(PriSys){$(PS)}DO:3-Cmd.VAL")
+        field(CALC, "(A<<31)+(B<<8)+(F<<3)+(E<<2)+(D<<1)+C")
+	field(SCAN, "1 second")
+	field(OUT, "$(PriSys){$(PS)}Dout1Reg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}Dout1Reg-SP")
+}
+record(longout, "$(PriSys){$(PS)}Dout1Reg-SP") {
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 32")
+}
+
+#10th register [bit(3:0) commands]
+record(bo,"$(PriSys){$(PS)}DO:4-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 4")
+}
+record(bo,"$(PriSys){$(PS)}DO:5-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 5")
+}
+record(bo,"$(PriSys){$(PS)}DO:6-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 6")
+}
+
+record(bo,"$(PriSys){$(PS)}DO:7-Cmd")
+{
+        field(ZNAM, "LO")
+        field(ONAM, "HI")
+        field(DESC, "Digital Output 7")
+}
+
+record(calcout,"$(PriSys){$(PS)}DoutCmd2-Calc_")
+{
+        field(DESC, "Digital CMD2")
+        field(INPA, "$(PriSys){$(PS)}DO:4-Cmd.VAL")
+        field(INPB, "$(PriSys){$(PS)}DO:5-Cmd.VAL")
+        field(INPC, "$(PriSys){$(PS)}DO:6-Cmd.VAL")
+        field(INPD, "$(PriSys){$(PS)}DO:7-Cmd.VAL")
+        field(CALC, "(D<<3)+(C<<2)+(B<<1)+A")
+	field(SCAN, "1 second")
+	field(OUT, "$(PriSys){$(PS)}Dout2Reg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}Dout2Reg-SP")
+}
+
+record(longout, "$(PriSys){$(PS)}Dout2Reg-SP") {
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 36")
+}
+
+#11th resigter: [bit(7:4):selection of 2nd 10KHzADC; bit(3:0):secletion of 1st 10KHzADC]
+record(longout,"$(PriSys){$(PS)}ADC10k:0-Sel")
+{
+	field(DESC, "ADC to shown as ADC10k:0-Raw-I")
+}
+record(longout,"$(PriSys){$(PS)}ADC10k:1-Sel")
+{
+	field(DESC, "ADC to shown as ADC10k:1-Raw-I")
+}
+record(calcout,"$(PriSys){$(PS)}AdcID12-Calc_")
+{
+	field(DESC, "ID")
+	field(INPA, "$(PriSys){$(PS)}ADC10k:0-Sel.VAL")
+	field(INPB, "$(PriSys){$(PS)}ADC10k:1-Sel.VAL")
+	field(CALC, "((B<<4)+A)")
+	field(SCAN, "1 second")
+	field(OUT, "$(PriSys){$(PS)}AdcSelReg-SP.VAL")
+	field(FLNK,"$(PriSys){$(PS)}AdcSelReg-SP")
+}
+
+record(longout, "$(PriSys){$(PS)}AdcSelReg-SP") {
+	field(SCAN, "Passive")
+	field(DTYP, "PSC Reg")
+	field(OUT , "@Tx$(PS) 80 40")
+}
+
+#flush reg to socket buffer, trigger send to send all socket buffer to PSC
+record(longout, "$(PriSys){$(PS)}regsend") {
+  field(DTYP, "PSC Ctrl Send")
+  field(OUT , "@Tx$(PS)")
+  field(VAL , "80")
+  field(FLNK, "$(PriSys){$(PS)}send")
+}
+
+#Send all buffer to PSC
+record(bo, "$(PriSys){$(PS)}send") {
+  field(DTYP, "PSC Ctrl Send All")
+  field(OUT , "@Tx$(PS)")
+  field(ZNAM, "Send")
+  field(ONAM, "Send")
+}
+

@@ -1,0 +1,14 @@
+#
+# INPUT=BR{PSC17}DI:01-Sts, OUTPUT=BR:A1-PS{6A:CY1}DI:PSFault-Sts, WF_LENGTH=998
+#
+
+# Simple alias
+#alias("$(INPUT)", "$(OUTPUT)")
+
+# If we want to have a DESC for our alias then we should use the following definition
+# But initial DESC will be overwritten
+record(bi, "$(INPUT)")
+{
+    alias("$(OUTPUT)")
+    field(DESC, "Blah-blah")
+}

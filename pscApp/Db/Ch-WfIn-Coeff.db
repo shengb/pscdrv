@@ -1,0 +1,58 @@
+#
+# INPUT=BR{PSC17}ADC:00-Wf-I, OUTPUT=BR:A1-PS{6A:CX1}I:DAC-I, WF_LENGTH=998
+#
+
+record(waveform, "$(OUTPUT)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "FLOAT")
+    
+    # sync timestamp with the corresponding PSC record
+    # (which in turn is synchronized with previous booster cycle start)
+    field(TSEL, "$(INPUT).TIME")
+}
+
+record(ao, "$(OUTPUT)-Coeff")
+{
+    field(PREC, "7")
+    field(PINI, "0")
+    field(VAL,  "1.0")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(ao, "$(OUTPUT)-Offset")
+{
+    field(PREC, "7")
+    field(PINI, "0")
+    field(VAL,  "0.0")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(aSub, "$(OUTPUT)-aSub_")
+{
+    field(SNAM, "subApplyCoefficient")
+    
+    field(INPA, "$(INPUT) CP")
+    field(FTA,  "FLOAT") 
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(OUTPUT)-Coeff PP")
+    field(FTB,  "DOUBLE") 
+    field(NOB,  "1")
+    
+    field(INPC, "$(OUTPUT)-Offset PP")
+    field(FTC,  "DOUBLE") 
+    field(NOC,  "1")
+
+    # Do coefficient inversion
+    field(INPD, "0")
+    field(FTD,  "CHAR") 
+    field(NOD,  "1")
+   
+    field(OUTA, "$(OUTPUT) PP")
+    field(FTVA, "FLOAT")
+    field(NOVA, "$(WF_LENGTH)")
+}
+

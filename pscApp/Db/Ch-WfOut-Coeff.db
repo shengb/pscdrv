@@ -1,0 +1,64 @@
+#
+# INPUT=BR:A1-PS{6A:CX1}I:PS-SP, OUTPUT=BR{PSC17}DAC:00-SP, WF_LENGTH=998
+#
+
+# here should be an aequation
+
+# coefficient
+record(ao, "$(INPUT)-Coeff")
+{
+    field(PREC, "7")
+    field(PINI, "0")
+    field(VAL,  "1.0")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+# offset
+record(ao, "$(INPUT)-Offset")
+{
+    field(PREC, "7")
+    field(PINI, "0")
+    field(VAL,  "0.0")    
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+
+# write waveform with ramp function here, function should be in physics units
+# e.g. Amps of a Power Supply
+record(waveform, "$(INPUT)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "FLOAT")
+    field(FLNK, "$(INPUT)-aSub_")
+    
+#    field(TPRO, "1")
+}
+
+record(aSub, "$(INPUT)-aSub_")
+{
+    field(SNAM, "subApplyCoefficient")
+    
+    field(INPA, "$(INPUT)")
+    field(FTA,  "FLOAT")
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(INPUT)-Coeff PP")
+    field(FTB,  "DOUBLE") 
+    field(NOB,  "1")
+    
+    field(INPC, "$(INPUT)-Offset PP")
+    field(FTC,  "DOUBLE") 
+    field(NOC,  "1")
+
+    # Do coefficient inversion
+    field(INPD, "1")
+    field(FTD,  "CHAR") 
+    field(NOD,  "1")
+    
+    field(OUTA, "$(OUTPUT) PP")
+    field(FTVA, "FLOAT")
+    field(NOVA, "$(WF_LENGTH)")
+}
+

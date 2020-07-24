@@ -1,0 +1,248 @@
+##################################
+### Channel Monitoring records ###
+### v.1.1.1 16 Apr 2014        ###
+### Pavel Cheblakov, 2013-2014 ###
+##################################
+
+# Channel that holds reference data
+record(waveform, "$(CH_REF)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+
+	info(autosaveFields_pass1, "VAL")
+}
+
+# Tolerance for the Differential value
+record(waveform, "$(CH_TOL)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+    
+    info(autosaveFields_pass1, "VAL")
+}
+
+# Differential value
+record(waveform, "$(CH_DIFFREF)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+}
+
+# Value to be archived
+# It contains the same data as $(CH) but is processed only when it 
+# is needed to be archived
+record(waveform, "$(CH_ARCH)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+    
+    field(INP,  "$(CH)")
+    
+    # sync timestam of CH_ARCH with CH
+    field(TSEL, "$(CH).TIME")
+}
+
+# if we want provide "Off mode" for monitoring we should
+# uncomment the record below and pass to this db-file
+# additional parametr MODE_PV to get this information 
+# (to know when Off-mode is choosen)
+#
+#record(calcout, "$(CH)Off_enbl_calcout_")
+#{
+#    field(INPA, "$(MODE_PV) CP")
+#
+#    field(CALC, "A = 0 ? -100 : 0")
+#    field(OOPT, "When Non-zero")
+#    field(PINI, "YES")
+#
+#    field(OUT,  "$(CH_FLG) PP")
+#}
+
+##########################
+
+# This coefficeint multipled by Tollerance
+# is used to warn about significat deviation from
+# the reference value
+record(ai, "$(CH_COEFF)")
+{
+    field(VAL, "10")
+    
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(aSub, "$(CH)_Cmp_")
+{
+    field(SNAM, "subArrayCompare")
+    
+    field(INPA, "$(CH_TOL)")
+    field(FTA,  "$(DATA_TYPE)")    
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(CH_DIFFREF)")
+    field(FTB,  "$(DATA_TYPE)")    
+    field(NOB,  "$(WF_LENGTH)")
+    
+    field(INPC, "$(CH_COEFF)")
+    field(FTC,  "$(DATA_TYPE)")    
+    field(NOC,  "1")
+
+    field(NOVA, "1")
+    field(FTVA, "CHAR")
+    field(OUTA, "$(CH_FLG) PP")
+}
+
+# This channel hold the status flag.
+# Possible values are presented below
+record(ai, "$(CH_FLG)")
+{
+    #-100 - monitoring is switched off
+    #-2.0 - wrong tollerance table
+    # 0.0 - Ok
+    # 1.0 - Not Ok
+    # 2.0 - Achtung!
+    
+    field(HOPR, "2.0")
+    field(LOPR, "-100.0")
+
+    field(HIHI, "2.0")
+    field(HHSV, "MAJOR")
+    
+    field(HIGH, "1.0")
+    field(HSV,  "MINOR")
+    
+    field(LOLO, "-100.0")
+    field(LLSV,  "MAJOR")
+    
+    field(FLNK, "$(CH_DIFFARCH)_Sub_")
+}
+
+##########################
+
+
+##########################
+######### BEGIN ##########
+##########################
+
+# this record in the processing chain is a custmoization
+# for NSLS-II Booster. It performs copying previously stored
+# tolerance waveform depending on the selected monitoring mode (MODE_PV) 
+# to the main tolerance PV (CH_TOL) for further using.
+# If you don't need it simply comment it out
+
+record(aSub, "$(CH)_TolCpSub_")
+{
+    field(SNAM, "subCopyWaveform")
+
+    field(INPA, "$(CH_TOL)_SP CP")
+    field(FTA,  "$(DATA_TYPE)")
+    field(NOA,  "$(WF_LENGTH)")
+
+    field(INPB, "$(CH_TOL)_REF CP")
+    field(FTB,  "$(DATA_TYPE)")
+    field(NOB,  "$(WF_LENGTH)")
+
+    field(INPC, "$(MODE_PV) CP")
+    field(FTC,  "CHAR")
+    field(NOC,  "1")
+
+    field(OUTA, "$(CH_TOL) PP")
+    field(FTVA, "$(DATA_TYPE)")
+    field(NOVA, "$(WF_LENGTH)")
+}
+
+record(waveform, "$(CH_TOL)_SP")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+    
+    info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(CH_TOL)_REF")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+    
+    info(autosaveFields_pass1, "VAL")
+}
+
+##########################
+########## END ###########
+##########################
+
+
+# Differential value for archiving
+record(waveform, "$(CH_DIFFARCH)")
+{
+    field(NELM, "$(WF_LENGTH)")
+    field(FTVL, "$(DATA_TYPE)")
+}
+
+record(aSub, "$(CH_DIFFARCH)_Sub_")
+{
+    field(SNAM, "subArraySubtraction")
+    
+    field(INPA, "$(CH_ARCH)")
+    field(FTA,  "$(DATA_TYPE)")    
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(CH)")
+    field(FTB,  "$(DATA_TYPE)")    
+    field(NOB,  "$(WF_LENGTH)")
+    
+    field(NOVA, "$(WF_LENGTH)")
+    field(FTVA, "$(DATA_TYPE)")
+    field(OUTA, "$(CH_DIFFARCH) PP")
+    
+    field(FLNK, "$(CH)_CmpArch_")
+}
+
+record(aSub, "$(CH)_CmpArch_")
+{
+    field(SNAM, "subArrayCompare")
+    
+    field(INPA, "$(CH_TOL)")
+    field(FTA,  "$(DATA_TYPE)")    
+    field(NOA,  "$(WF_LENGTH)")
+    
+    field(INPB, "$(CH_DIFFARCH)")
+    field(FTB,  "$(DATA_TYPE)")    
+    field(NOB,  "$(WF_LENGTH)")
+    
+    field(INPC, "2.0")
+    field(FTC,  "$(DATA_TYPE)")    
+    field(NOC,  "1")
+
+    field(NOVA, "1")
+    field(FTVA, "CHAR")
+    field(OUTA, "$(CH_FLGARCH) PP")
+}
+
+# This flag shows (by changing from zero
+# to non-zero) when archiving is happening
+record(ai, "$(CH_FLGARCH)")
+{
+    #-1.0 - wrong tollerance table 
+    # 0.0 - value in a tollerance
+    #>0.0 - value out of a tollerance
+    
+    field(HOPR, "2.0")
+    field(LOPR, "-2.0")
+    
+    field(FLNK, "$(CH_FLGARCH)_calcout_")
+}
+
+##########################
+# process CH_ARCH record only when CH_FLGARCH performs transition from zero (ok!)
+# to non-zero (not ok!) value
+record(calcout, "$(CH_FLGARCH)_calcout_")
+{
+    field(INPA, "$(CH_FLGARCH)")
+    
+    field(CALC, "A > 0")
+    field(OOPT, "When Non-zero")
+    
+    field(OUT,  "$(CH_ARCH).PROC")
+}
+

@@ -1,0 +1,267 @@
+# Will move to ADCWaveform.db
+#Rx Connection PV
+record(bi, "$(PriSys){$(PS)}Sts:RxConn-Sts") {
+  field(DTYP, "PSC Ctrl Connected")
+  field(INP , "@Rx$(PS)")
+  field(SCAN, "I/O Intr")
+  field(ZNAM, "Disconnected")
+  field(ONAM, "Connected")
+  field(ZSV , "MAJOR")
+}
+
+#1st--10th register: Slow ADC data. Booster is not likely to use them. To keep database simple, just skip it now.
+
+#11th register: PSI digital status inputs
+record(bi, "$(PriSys){$(PS)}DI:00-Sts")
+{
+        field(DESC, "PSI Digital Input 0")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x1")
+        field(ZNAM,"Din[0]=LO")
+        field(ONAM,"Din[0]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:01-Sts")
+{
+        field(DESC, "PSI Digital Input 1")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x2")
+        field(ZNAM,"Din[1]=LO")
+        field(ONAM,"Din[1]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:02-Sts")
+{
+        field(DESC, "PSI Digital Input 2")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x4")
+        field(ZNAM,"Din[2]=LO")
+        field(ONAM,"Din[2]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:03-Sts")
+{
+        field(DESC, "PSI Digital Input 3")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x8")
+        field(ZNAM,"Din[3]=LO")
+        field(ONAM,"Din[3]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:04-Sts")
+{
+        field(DESC, "PSI Digital Input 4")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x10")
+        field(ZNAM,"Din[4]=LO")
+        field(ONAM,"Din[4]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:05-Sts")
+{
+        field(DESC, "PSI Digital Input 5")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x20")
+        field(ZNAM,"Din[5]=LO")
+        field(ONAM,"Din[5]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:06-Sts")
+{
+        field(DESC, "PSI Digital Input 6")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x40")
+        field(ZNAM,"Din[6]=LO")
+        field(ONAM,"Din[6]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:07-Sts")
+{
+        field(DESC, "PSI Digital Input 7")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x80")
+        field(ZNAM,"Din[7]=LO")
+        field(ONAM,"Din[7]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:08-Sts")
+{
+        field(DESC, "PSI Digital Input 8")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x100")
+        field(ZNAM,"Din[8]=LO")
+        field(ONAM,"Din[8]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:09-Sts")
+{
+        field(DESC, "PSI Digital Input 9")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x200")
+        field(ZNAM,"Din[9]=LO")
+        field(ONAM,"Din[9]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:10-Sts")
+{
+        field(DESC, "PSI Digital Input 10")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x400")
+        field(ZNAM,"Din[10]=LO")
+        field(ONAM,"Din[10]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:11-Sts")
+{
+        field(DESC, "PSI Digital Input 11")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x800")
+        field(ZNAM,"Din[11]=LO")
+        field(ONAM,"Din[11]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:12-Sts")
+{
+        field(DESC, "PSI Digital Input 12")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x1000")
+        field(ZNAM,"Din[12]=LO")
+        field(ONAM,"Din[12]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:13-Sts")
+{
+        field(DESC, "PSI Digital Input 13")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x2000")
+        field(ZNAM,"Din[13]=LO")
+        field(ONAM,"Din[13]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:14-Sts")
+{
+        field(DESC, "PSI Digital Input 14")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x4000")
+        field(ZNAM,"Din[14]=LO")
+        field(ONAM,"Din[14]=HI")
+}
+record(bi, "$(PriSys){$(PS)}DI:15-Sts")
+{
+        field(DESC, "PSI Digital Input 15")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x8000")
+        field(ZNAM,"Din[15]=LO")
+        field(ONAM,"Din[15]=HI")
+}
+
+record(bi, "$(PriSys){$(PS)}Pol:PSI-Sts")
+{
+        field(DESC, "PSI Polariy")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 40")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x10000")
+        field(ZNAM, "Bipolar")
+        field(ONAM, "Unipolar")
+}
+
+#12th register: PSI digital status inputs
+record(bi, "$(PriSys){$(PS)}DI:PscFiberSd-Sts")
+{
+        field(DESC, "PSI Fiber Connection")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 44")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x100000")
+        field(ZNAM, "Failed")
+        field(ONAM, "Good")
+}
+#MSB byte is the IP address
+record(longin, "$(PriSys){$(PS)}IpReg") {
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 44")
+	field(SCAN, "I/O Intr")
+	field(FLNK, "$(PriSys){$(PS)}ID:IP-I")
+}
+record(calc, "$(PriSys){$(PS)}ID:IP-I") {
+	field(DESC, "Last Byte IP")
+	field(INPA, "$(PriSys){$(PS)}IpReg.VAL")
+	field(CALC, "(A>>24)")
+}
+
+#13th register: MSB 2 byte is the main board temp 
+record(longin, "$(PriSys){$(PS)}TempReg") {
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 48")
+	field(SCAN, "I/O Intr")
+	field(FLNK, "$(PriSys){$(PS)}T:PscFront-I")
+}
+record(calc, "$(PriSys){$(PS)}T:PscFront-I")
+{
+        field(DESC, "Front main board sensor")
+        field(INPA, "$(PriSys){$(PS)}TempReg.VAL")
+        field(CALC, "(A*0.125/2097152)")
+}
+
+#14th register: bit16 handshaking, bit[15:8] firmware version
+record(bi, "$(PriSys){$(PS)}Rdy:Handshaking-Sts")
+{
+    field(DESC, "Handshaking")
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 52")
+	field(SCAN, "I/O Intr")
+	field(MASK, "0x10000")
+    field(ZNAM, "0")
+    field(ONAM, "1")
+    field(FLNK, "$(PriSys){$(PS)}-Sts_calcout_")
+}
+
+record(longin, "$(PriSys){$(PS)}RevReg") {
+	field(DTYP, "PSC Reg")
+	field(INP , "@Rx$(PS) 64 52")
+	field(SCAN, "I/O Intr")
+	field(FLNK, "$(PriSys){$(PS)}hwRev-I")
+}
+record(calc, "$(PriSys){$(PS)}hwRev-I")
+{
+        field(DESC, "PSC Firmware Version")
+        field(INPA, "$(PriSys){$(PS)}RevReg.VAL")
+        field(CALC, "CEIL(A&0x0000FF00)/2560.0")
+}
+
+record(calcout, "$(PriSys){$(PS)}-Sts_calcout_")
+{
+    field(INPA, "$(PriSys){$(PS)}Sts:RxConn-Sts CP")
+    field(INPB, "$(PriSys){$(PS)}DI:PscFiberSd-Sts CP")
+    field(INPC, "$(PriSys){$(PS)}Rdy:Handshaking-Sts NPP")
+    field(INPD, "$(PriSys){$(PS)}DAC:0_Tbl-Sts CP")
+    field(INPE, "$(PriSys){$(PS)}DAC:1_Tbl-Sts CP")
+    
+    field(CALC, "A<<0|B<<1|C<<2|D<<3|E<<9")
+    
+    field(OUT,  "$(PriSys){$(PS)}Sts:PSC-Sts PP")
+}
+
+record(mbbiDirect, "$(PriSys){$(PS)}Sts:PSC-Sts")
+{
+    
+}

@@ -1,0 +1,832 @@
+#####
+# Encoder Interface control database
+# Command format (16-bit max):
+# 15..12 11..8 7 .. 4 3 .. 0
+# <cmd>  <mod> <reg> <offset>
+# supported commands:
+# 0 - reg bit write
+# 1 - reg u8 write
+# 2 - reg u16 write
+# 3 - reg u32 write
+# mod is FPGA IP module ref number. Modules used:
+# enc (# 0-3) for qaud encoder handling,
+# enc_dummy (# 4-7) for regeneration control,
+# evr_dummy (# 8) for internal EVR (TS) generation,
+# pulsegen  (# 9) for LEMO DO generation and timestamp,
+# io_conf   (#10) for global reset at misc IO control. 
+# reg is register number inside the module (0..7)
+# offset is a bit/byte/word offset inside reg 
+# for reg bit/u8/u16 write cmd, ignored for u32
+####
+
+record(mbbo, "$(Sys){$(Dev=Enc):1}Fltr:dY-SP") {
+    field(DESC, "Ch1 position filtering window height")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1020") 
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(longout, "$(Sys){$(Dev=Enc):1}Fltr:dT-SP") {
+    field(DESC, "Ch1 position filtering window width")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x3030")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Rst-Cmd") {
+    field(DESC, "Resets enc FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0000")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Ignore-Sel") {
+    field(DESC, "Channel input doesn't come to EPICS")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0002")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignore")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Dir:Reverse-Sel") {
+    field(DESC, "Reverse direction for channel")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0003")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Gen:Rst-Cmd") {
+    field(DESC, "Resets enc_dummy FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0400")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Dsbl:Driver-Sel") {
+    field(DESC, "Ch1 disable output driver for TX")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x040C")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    field(ZNAM, "Normal")
+    field(ONAM, "Disabled")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Cmd:Trig-Cmd") {
+    field(DESC, "Ch1 generation trigger")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x040D")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Mod:Gen-Sel") {
+    field(DESC, "Ch1 generation mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x040E")
+    field(ZNAM, "Filtering")
+    field(ONAM, "Emulation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):1}Mod:Out-Sel") {
+    field(DESC, "Ch1 output interface mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x040F")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):1}Gen:CycNum-SP") {
+    field(DESC, "Ch1 generation cycle number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2410")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):1}Gen:StepNum-SP") {
+    field(DESC, "Ch1 generation step number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2411")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):1}Gen:CycT-SP") {
+    field(DESC, "Ch1 generation cycle length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2420")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):1}Gen:StepT-SP") {
+    field(DESC, "Ch1 generation step length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2421")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):2}Fltr:dY-SP") {
+    field(DESC, "Ch2 position filtering window height")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1120")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):2}Fltr:dT-SP") {
+    field(DESC, "Ch2 position filtering window width")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x3130")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Rst-Cmd") {
+    field(DESC, "Resets enc FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0100")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Ignore-Sel") {
+    field(DESC, "Channel input doesn't come to EPICS")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0102")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignore")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Dir:Reverse-Sel") {
+    field(DESC, "Reverse direction for channel")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0103")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Gen:Rst-Cmd") {
+    field(DESC, "Resets enc_dummy FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0500")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Dsbl:Driver-Sel") {
+    field(DESC, "Ch2 disable output driver for TX")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x050C")
+    field(ZNAM, "Normal")
+    field(ONAM, "Disabled")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Cmd:Trig-Cmd") {
+    field(DESC, "Ch2 generation trigger")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x050D")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Mod:Gen-Sel") {
+    field(DESC, "Ch2 generation mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x050E")
+    field(ZNAM, "Filtering")
+    field(ONAM, "Emulation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):2}Mod:Out-Sel") {
+    field(DESC, "Ch2 output interface mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x050F")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):2}Gen:CycNum-SP") {
+    field(DESC, "Ch2 generation cycle number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2510")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):2}Gen:StepNum-SP") {
+    field(DESC, "Ch2 generation step number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2511")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):2}Gen:CycT-SP") {
+    field(DESC, "Ch2 generation cycle length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2520")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):2}Gen:StepT-SP") {
+    field(DESC, "Ch2 generation step length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2521")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):3}Fltr:dY-SP") {
+    field(DESC, "Ch3 position filtering window height")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1220")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):3}Fltr:dT-SP") {
+    field(DESC, "Ch3 position filtering window width")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x3230")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Rst-Cmd") {
+    field(DESC, "Resets enc FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0200")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Ignore-Sel") {
+    field(DESC, "Channel input doesn't come to EPICS")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0202")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignore")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Dir:Reverse-Sel") {
+    field(DESC, "Reverse direction for channel")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0203")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Gen:Rst-Cmd") {
+    field(DESC, "Resets enc_dummy FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0600")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Dsbl:Driver-Sel") {
+    field(DESC, "Ch3 disable output driver for TX")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x060C")
+    field(ZNAM, "Normal")
+    field(ONAM, "Disabled")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Cmd:Trig-Cmd") {
+    field(DESC, "Ch3 generation trigger")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x060D")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Mod:Gen-Sel") {
+    field(DESC, "Ch3 generation mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x060E")
+    field(ZNAM, "Filtering")
+    field(ONAM, "Emulation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):3}Mod:Out-Sel") {
+    field(DESC, "Ch3 output interface mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x060F")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):3}Gen:CycNum-SP") {
+    field(DESC, "Ch3 generation cycle number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2610")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):3}Gen:StepNum-SP") {
+    field(DESC, "Ch3 generation step number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2611")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):3}Gen:CycT-SP") {
+    field(DESC, "Ch3 generation cycle length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2620")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):3}Gen:StepT-SP") {
+    field(DESC, "Ch3 generation step length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2621")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):4}Fltr:dY-SP") {
+    field(DESC, "Ch4 position filtering window height")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1320")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):4}Fltr:dT-SP") {
+    field(DESC, "Ch4 position filtering window width")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x3330")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Rst-Cmd") {
+    field(DESC, "Resets enc FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0300")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Ignore-Sel") {
+    field(DESC, "Channel input doesn't come to EPICS")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0302")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignored")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Dir:Reverse-Sel") {
+    field(DESC, "Reverse direction for channel")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0303")
+    field(ZNAM, "Normal")
+    field(ONAM, "Reversed")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Gen:Rst-Cmd") {
+    field(DESC, "Resets enc_dummy FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0700")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Dsbl:Driver-Sel") {
+    field(DESC, "Ch4 disable output driver for TX")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x070C")
+    field(ZNAM, "Normal")
+    field(ONAM, "Disabled")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Cmd:Trig-Cmd") {
+    field(DESC, "Ch4 generation trigger")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x070D")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Mod:Gen-Sel") {
+    field(DESC, "Ch4 generation mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x070E")
+    field(ZNAM, "Filtering")
+    field(ONAM, "Emulation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):4}Mod:Out-Sel") {
+    field(DESC, "Ch4 output interface mode select")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x070F")
+    field(ZNAM, "Bypass")
+    field(ONAM, "Generation")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):4}Gen:CycNum-SP") {
+    field(DESC, "Ch4 generation cycle number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2710")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):4}Gen:StepNum-SP") {
+    field(DESC, "Ch4 generation step number")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2711")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):4}Gen:CycT-SP") {
+    field(DESC, "Ch4 generation cycle length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2720")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc):4}Gen:StepT-SP") {
+    field(DESC, "Ch4 generation step length")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2721")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(longout, "$(Sys){$(Dev=Enc)}T:sec-SP") {
+    field(DESC, "Set sec for internal timestamp")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x3810")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(longout, "$(Sys){$(Dev=Enc)}T:nsec-SP") {
+    field(DESC, "Set nsec for internal timestamp")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x3820") 
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)}T:Set-Cmd") {
+    field(DESC, "Set internal timestamp to SP")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0802")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    field(HIGH, "1")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)}T:Internal-Sel") {
+    field(DESC, "Use internally generated timestamp")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0801")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    field(ZNAM, "External")
+    field(ONAM, "Internal")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:0}Rst-Cmd") {
+    field(DESC, "Resets Out0 pulsegen module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0900")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:0}Ena-Cmd") {
+    field(DESC, "Enable Out0 pulse train generation")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x901")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:0}Unit-Sel") {
+    field(DESC, "Out0 generation period units selection")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x902")
+    field(ZNAM, "us")
+    field(ONAM, "ms")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:0}Unit-bo_")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:0}Unit-bo_")
+{
+    field(DESC, "Aux units pass")
+    field(OMSL, "closed_loop")
+    field(DOL, "$(Sys){$(Dev=Enc)-DO:0}Unit-Sel NPP")
+    field(OUT, "$(Sys){$(Dev=Enc)-DO:0}Period-SP.EGU")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:0}Dflt-Sel") {
+    field(DESC, "Default line level and pulse polarity")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x903")
+    field(ZNAM, "Low and Pos Pulses")
+    field(ONAM, "High and neg Pulses")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(ao, "$(Sys){$(Dev=Enc)-DO:0}DutyCycle-SP") {
+    field(DESC, "Generated pulses duty cycle")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1901")
+    field(EGU , "%")
+    field(HOPR , "100")
+    field(LOPR , "0")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc)-DO:0}Period-SP") {
+    field(DESC, "Generated pulses period")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2901")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:1}Rst-Cmd") {
+    field(DESC, "Resets Out0 pulsegen module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x910")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:1}Ena-Cmd") {
+    field(DESC, "Enable Out1 pulse train generation")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x911")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:1}Unit-Sel") {
+    field(DESC, "Out1 generation period units selection")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x912")
+    field(ZNAM, "us")
+    field(ONAM, "ms")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:1}Unit-bo_")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:1}Unit-bo_")
+{
+    field(DESC, "Aux units pass")
+    field(OMSL, "closed_loop")
+    field(DOL, "$(Sys){$(Dev=Enc)-DO:1}Unit-Sel NPP")
+    field(OUT, "$(Sys){$(Dev=Enc)-DO:1}Period-SP.EGU")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:1}Dflt-Sel") {
+    field(DESC, "Default line level and pulse polarity")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x913")
+    field(ZNAM, "Low and Pos Pulses")
+    field(ONAM, "High and neg Pulses")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(ao, "$(Sys){$(Dev=Enc)-DO:1}DutyCycle-SP") {
+    field(DESC, "Generated pulses duty cycle")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1911")
+    field(EGU , "%")
+    field(HOPR , "100")
+    field(LOPR , "0")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc)-DO:1}Period-SP") {
+    field(DESC, "Generated pulses period")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2911")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:2}Rst-Cmd") {
+    field(DESC, "Resets Out2 pulsegen module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x920")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:2}Ena-Cmd") {
+    field(DESC, "Enable Out2 pulse train generation")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x921")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:2}Unit-Sel") {
+    field(DESC, "Out2 generation period units selection")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x922")
+    field(ZNAM, "us")
+    field(ONAM, "ms")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:2}Unit-bo_")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:2}Unit-bo_")
+{
+    field(DESC, "Aux units pass")
+    field(OMSL, "closed_loop")
+    field(DOL, "$(Sys){$(Dev=Enc)-DO:2}Unit-Sel NPP")
+    field(OUT, "$(Sys){$(Dev=Enc)-DO:2}Period-SP.EGU")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:2}Dflt-Sel") {
+    field(DESC, "Default line level and pulse polarity")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x923")
+    field(ZNAM, "Low and Pos Pulses")
+    field(ONAM, "High and neg Pulses")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(ao, "$(Sys){$(Dev=Enc)-DO:2}DutyCycle-SP") {
+    field(DESC, "Generated pulses duty cycle")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1921")
+    field(EGU , "%")
+    field(HOPR , "100")
+    field(LOPR , "0")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc)-DO:2}Period-SP") {
+    field(DESC, "Generated pulses period")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2921")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:3}Rst-Cmd") {
+    field(DESC, "Resets Out0 pulsegen module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x930")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:3}Ena-Cmd") {
+    field(DESC, "Enable Out0 pulse train generation")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x931")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:3}Unit-Sel") {
+    field(DESC, "Out3 generation period units selection")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x932")
+    field(ZNAM, "us")
+    field(ONAM, "ms")
+    field(FLNK, "$(Sys){$(Dev=Enc)-DO:3}Unit-bo_")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:3}Unit-bo_")
+{
+    field(DESC, "Aux units pass")
+    field(OMSL, "closed_loop")
+    field(DOL, "$(Sys){$(Dev=Enc)-DO:3}Unit-Sel NPP")
+    field(OUT, "$(Sys){$(Dev=Enc)-DO:3}Period-SP.EGU")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc)-DO:3}Dflt-Sel") {
+    field(DESC, "Default line level and pulse polarity")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x933")
+    field(ZNAM, "Low and Pos Pulses")
+    field(ONAM, "High and neg Pulses")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(ao, "$(Sys){$(Dev=Enc)-DO:3}DutyCycle-SP") {
+    field(DESC, "Generated pulses duty cycle")
+    field(DTYP, "PSC Single I32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x1931")
+    field(EGU , "%")
+    field(HOPR , "100")
+    field(LOPR , "0")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo, "$(Sys){$(Dev=Enc)-DO:3}Period-SP") {
+    field(DESC, "Generated pulses period")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x2931")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):DI}Rst-Cmd") {
+    field(DESC, "Resets io_scan FPGA hardware module")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0B00")
+    field(HIGH, "1")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+}
+
+record(bo, "$(Sys){$(Dev=Enc):DI}Ignore-Sel") {
+    field(DESC, "Channel input doesn't come to EPICS")
+    field(DTYP, "PSC Single U32")
+    field(OUT , "@Tx$(Dev=Enc) 1 0x0B02")
+    field(ZNAM, "Normal")
+    field(ONAM, "Ignore")
+    field(FLNK, "$(Sys){$(Dev=Enc)}GoRegSingleWrite")
+    info(autosaveFields_pass0, "VAL")
+}
+
+#flush reg to socket buffer, trigger send to send all socket buffer to PSC
+record(bo, "$(Sys){$(Dev=Enc)}send") {
+        field(DTYP, "PSC Ctrl Send All")
+        field(OUT , "@Tx$(Dev=Enc)")
+        field(ZNAM, "Send")
+        field(ONAM, "Send")
+}
+
+record(longout, "$(Sys){$(Dev=Enc)}GoRegSingleWrite") {
+        field(DTYP, "PSC Ctrl Send")
+        field(OUT , "@Tx$(Dev=Enc)")
+        field(VAL , "1")
+        field(FLNK, "$(Sys){$(Dev=Enc)}send")
+}
+

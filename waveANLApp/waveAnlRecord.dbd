@@ -1,0 +1,350 @@
+#*************************************************************************\
+# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+# National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+# Operator of Los Alamos National Laboratory.
+# This file is distributed subject to a Software License Agreement found
+# in the file LICENSE that is included with this distribution. 
+#*************************************************************************/
+recordtype(waveAnl) {
+	include "dbCommon.dbd" 
+	field(MAX,DBF_DOUBLE) {
+		prompt("Maximum value in data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(MIN,DBF_DOUBLE) {
+		prompt("Minimum value in data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(PKPK,DBF_DOUBLE) {
+		prompt("Peak to peak value data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(MEAN,DBF_DOUBLE) {
+		prompt("Mean value of data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(VAR,DBF_DOUBLE) {
+		prompt("Variance of data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(SDEV,DBF_DOUBLE) {
+		prompt("Standard deviation of data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(MADV,DBF_DOUBLE) {
+		prompt("Mean absolute deviation of data set")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(FWHM,DBF_DOUBLE) {
+		prompt("Full width half maximum")
+		special(SPC_NOMOD)
+		interest(1)
+		promptgroup(GUI_OUTPUT)
+	}
+	field(NELM,DBF_ULONG) {
+		prompt("Max umber of elements")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("2")
+		promptgroup(GUI_WAVE)
+	}
+	field(NUSE,DBF_ULONG) {
+		prompt("Number of used elements")
+		special(SPC_NOMOD)
+		interest(1)
+		initial("2")
+	}
+	field(XPTR,DBF_NOACCESS) {
+		prompt("X axis scale array pointer")
+		special(SPC_DBADDR)
+		interest(4)
+		extra("double * xptr")
+	}
+	field(XRES,DBF_DOUBLE) {
+		prompt("X axis resoultion of samples")
+		interest(1)
+		initial("1")
+	}
+	field(XRSL,DBF_INLINK) {
+		prompt("X axis resoultion location")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(OXRS,DBF_DOUBLE) {
+		prompt("Old X axis resoultion of samples")
+		interest(1)
+	}
+	field(XOFF,DBF_DOUBLE) {
+		prompt("X axis offset")
+		interest(1)
+	}
+	field(XOFL,DBF_INLINK) {
+		prompt("X axis offset location")
+		interest(1)
+		promptgroup(GUI_INPUTS)
+	}
+	field(OXOF,DBF_DOUBLE) {
+		prompt("Old X axis offset location")
+		interest(1)
+		initial("1")
+	}
+	field(BGRI,DBF_DOUBLE) {
+		prompt("Beginning of region of interest")
+		interest(2)
+		special(SPC_MOD)
+		promptgroup(GUI_INPUTS)
+	}
+	field(ENRI,DBF_DOUBLE) {
+		prompt("End of region of interest")
+		interest(2)
+		special(SPC_MOD)
+		promptgroup(GUI_INPUTS)
+	}
+	field(BGIX,DBF_ULONG) {
+		prompt("Index of beginning of region of interest")
+		interest(2)
+		special(SPC_NOMOD)
+	}
+	field(ENIX,DBF_ULONG) {
+		prompt("Index of end of region of interest")
+		interest(2)
+		special(SPC_NOMOD)
+	}
+	field(THLD,DBF_DOUBLE) {
+		prompt("Threshold")
+		interest(1)
+		initial("0.5")
+		promptgroup(GUI_INPUTS)
+	}
+	field(BLOF,DBF_DOUBLE) {
+		prompt("Baseline offset value")
+		interest(1)  
+		promptgroup(GUI_INPUTS)
+	}
+	field(BLOL,DBF_INLINK) {
+		prompt("Baseline offset location")
+		interest(1)
+		promptgroup(GUI_LINKS)
+	}
+	field(BPTR,DBF_NOACCESS) {
+		prompt("Buffer Pointer")
+		special(SPC_NOMOD)
+		interest(4)
+		extra("double * bptr")
+	}
+	field(SADR,DBF_LONG) {
+		prompt("Subroutine Address")
+		special(SPC_NOMOD)
+		interest(2)
+		base(HEX)
+	}
+	field(INAM,DBF_STRING) {
+		prompt("Init Subr. Name")
+		interest(1)
+		size(40)
+		promptgroup(GUI_SUB)
+	}
+	field(SNAM,DBF_STRING) {
+		prompt("Process Subroutine Name")
+		special(SPC_MOD)
+		interest(1)
+		size(40)
+		promptgroup(GUI_SUB)
+	}
+	field(PASS,DBF_SHORT) {
+		prompt("Pass number for usr subrtn")
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(BRSV,DBF_MENU) {
+		prompt("Bad Return Severity")
+		pp(TRUE)
+		interest(1)
+		menu(menuAlarmSevr)
+	}
+	field(VAL,DBF_NOACCESS) {
+		base("HEX")
+		prompt("Ptr to output array")
+		asl(ASL0)
+		pp(TRUE)
+		special(SPC_DBADDR)
+		extra("double * val")
+	}
+	field(VALA,DBF_DOUBLE) {
+		prompt("User value A")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALB,DBF_DOUBLE) {
+		prompt("User value B")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALC,DBF_DOUBLE) {
+		prompt("User value C")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALD,DBF_DOUBLE) {
+		prompt("User value D")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALE,DBF_DOUBLE) {
+		prompt("User value E")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALF,DBF_DOUBLE) {
+		prompt("User value F")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALG,DBF_DOUBLE) {
+		prompt("User value G")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(VALH,DBF_DOUBLE) {
+		prompt("User value H")
+		asl(ASL0)
+		pp(TRUE)
+		interest(1)
+	}
+	field(INP,DBF_INLINK) {
+		prompt("Input Specification")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPA,DBF_INLINK) {
+		prompt("User Input Link A")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPB,DBF_INLINK) {
+		prompt("User Input Link B")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPC,DBF_INLINK) {
+		prompt("User Input Link C")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPD,DBF_INLINK) {
+		prompt("User Input Link D")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPE,DBF_INLINK) {
+		prompt("User Input Link E")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPF,DBF_INLINK) {
+		prompt("User Input Link F")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPG,DBF_INLINK) {
+		prompt("User Input Link G")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(INPH,DBF_INLINK) {
+		prompt("User Input Link H")
+		promptgroup(GUI_INPUTS)
+		interest(1)
+	}
+	field(A,DBF_DOUBLE) {
+		prompt("Value of User Input A")
+		interest(1)
+	}
+	field(B,DBF_DOUBLE) {
+		prompt("Value of User Input B")
+		interest(1)
+	}
+	field(C,DBF_DOUBLE) {
+		prompt("Value of User Input C")
+		interest(1)
+	}
+	field(D,DBF_DOUBLE) {
+		prompt("Value of User Input D")
+		interest(1)
+	}
+	field(E,DBF_DOUBLE) {
+		prompt("Value of User Input E")
+		interest(1)
+	}
+	field(F,DBF_DOUBLE) {
+		prompt("Value of User Input F")
+		interest(1)
+	}
+	field(G,DBF_DOUBLE) {
+		prompt("Value of User Input G")
+		interest(1)
+	}
+	field(H,DBF_DOUBLE) {
+		prompt("Value of User Input H")
+		interest(1)
+	}
+    field(PREC,DBF_SHORT) {
+		prompt("Display Precision")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+        }
+	field(EGUX,DBF_STRING) {
+		prompt("X Axis Engineering Units")
+		promptgroup(GUI_DISPLAY)
+	        interest(1)
+	        size(16)
+	}
+	field(HORX,DBF_FLOAT) {
+		prompt("X Axis High Operating Range")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(LORX,DBF_FLOAT) {
+		prompt("X Axis Low Operating Range")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(EGUY,DBF_STRING) {
+		prompt("Y Axis Engineering Units")
+		promptgroup(GUI_DISPLAY)
+	        interest(1)
+	        size(16)
+	}
+	field(HORY,DBF_FLOAT) {
+		prompt("Y Axis High Operating Range")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(LORY,DBF_FLOAT) {
+		prompt("Y Axis Low Operating Range")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+}
